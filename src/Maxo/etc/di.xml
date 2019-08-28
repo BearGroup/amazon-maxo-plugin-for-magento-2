@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * A copy of the License is located at
+ *
+ *  http://aws.amazon.com/apache2.0
+ *
+ * or in the "license" file accompanying this file. This file is distributed
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Payment Method Facade configuration -->
+    <virtualType name="AmazonMaxoFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">Amazon\Maxo\Gateway\Config\Config::CODE</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Magento\Payment\Block\Info</argument>
+            <!--
+            <argument name="valueHandlerPool" xsi:type="object">AmazonValueHandlerPool</argument>
+            <argument name="validatorPool" xsi:type="object">AmazonValidatorPool</argument>
+            <argument name="commandPool" xsi:type="object">AmazonCommandPool</argument>
+            -->
+        </arguments>
+    </virtualType>
+
+    <preference for="Amazon\Maxo\Client\ClientFactoryInterface" type="Amazon\Maxo\Client\ClientFactory" />
+    <preference for="AmazonPayV2\ClientInterface" type="Amazon\Maxo\Client\Client" />
+
+    <preference for="Amazon\Maxo\Api\CheckoutSessionManagementInterface" type="Amazon\Maxo\Model\CheckoutSessionManagement" />
+    <preference for="Amazon\Maxo\Api\AddressManagementInterface" type="Amazon\Maxo\Model\AddressManagement" />
+
+    <type name="Amazon\Maxo\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">amazonClientLogger</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="debug" xsi:type="object">Amazon\Maxo\Logger\Handler\Client</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Amazon\Maxo\Client\ClientFactory">
+        <arguments>
+            <argument name="logger" xsi:type="object">Amazon\Maxo\Logger\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Amazon\Core\Helper\Data">
+        <plugin name="amazon_maxo_amazon_core_helper" type="Amazon\Maxo\Plugin\AmazonCoreHelperData" sortOrder="1" />
+    </type>
+    <type name="Magento\Checkout\Model\PaymentInformationManagement">
+        <plugin name="amazon_maxo_save_payment_info" type="Amazon\Maxo\Plugin\SavePaymentInformation" sortOrder="10" disabled="false"/>
+    </type>
+    <type name="Magento\Checkout\Model\GuestPaymentInformationManagement">
+        <plugin name="amazon_maxo_save_payment_info" type="Amazon\Maxo\Plugin\SaveGuestPaymentInformation" sortOrder="10" disabled="false"/>
+    </type>
+
+</config>

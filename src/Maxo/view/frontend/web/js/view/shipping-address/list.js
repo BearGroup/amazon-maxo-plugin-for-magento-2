@@ -1,0 +1,23 @@
+define([
+    'Magento_Checkout/js/view/shipping-address/list',
+    'Magento_Customer/js/model/address-list',
+    'Amazon_Maxo/js/model/storage',
+    'ko'
+], function (Component, addressList, amazonStorage, ko) {
+    'use strict';
+
+    return Component.extend({
+        /**
+         * Init address list
+         */
+        initObservable: function () {
+            this._super();
+
+            if (amazonStorage.isAmazonCheckout()) {
+                this.visible = true;
+            }
+
+            return this;
+        }
+    });
+});
