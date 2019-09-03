@@ -1,5 +1,18 @@
 <?php
-
+/**
+ * Copyright © Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * A copy of the License is located at
+ *
+ *  http://aws.amazon.com/apache2.0
+ *
+ * or in the "license" file accompanying this file. This file is distributed
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
 namespace Amazon\Maxo\CustomerData;
 
 use Magento\Customer\CustomerData\SectionSourceInterface;
@@ -17,19 +30,27 @@ class CheckoutSession implements SectionSourceInterface
     /**
      * @var \Amazon\Maxo\Model\CheckoutSessionManagement
      */
-    private $checkoutSessionModel;
+    private $checkoutSessionManagement;
+
+    /**
+     * @var \Amazon\Maxo\Model\AmazonConfig
+     */
+    private $amazonConfig;
 
     /**
      * CheckoutSession constructor.
-     * @param \Magento\Framework\Session\Generic $session
+     * @param \Magento\Checkout\Model\Session $session
      * @param \Amazon\Maxo\Model\CheckoutSessionManagement $checkoutSessionManagement
+     * @param \Amazon\Maxo\Model\AmazonConfig $amazonConfig
      */
     public function __construct(
         \Magento\Checkout\Model\Session $session,
-        \Amazon\Maxo\Model\CheckoutSessionManagement $checkoutSessionManagement
+        \Amazon\Maxo\Model\CheckoutSessionManagement $checkoutSessionManagement,
+        \Amazon\Maxo\Model\AmazonConfig $amazonConfig
     ) {
         $this->session = $session;
         $this->checkoutSessionManagement = $checkoutSessionManagement;
+        $this->amazonConfig = $amazonConfig;
     }
 
     /**
@@ -37,24 +58,47 @@ class CheckoutSession implements SectionSourceInterface
      */
     public function getSectionData()
     {
-        return ['checkoutSessionId' => $this->getCheckoutSessionId()];
-    }
-
-    public function getCheckoutSessionId()
-    {
-        $sess = $this->session->getAmazonCheckoutSessionId();
-        if (!$sess) {
-            $response = $this->checkoutSessionManagement->createCheckoutSession();
-            if ($response) {
-                $sess = $response->checkoutSessionId;
-                $this->session->setAmazonCheckoutSessionId($sess);
-            }
+        $data = [];
+        if ($this->amazonConfig->isEnabled()) {
+            $data = ['checkoutSessionId' => $this->getCheckoutSessionId()];
         }
-        return $sess;
+        return $data;
     }
 
+    /**
+     * Clear Amazon Checkout Session Id
+     */
     public function clearCheckoutSessionId()
     {
         $this->session->unsAmazonCheckoutSessionId();
+    }
+
+    /**
+     * Get Amazon Checkout Session Id
+     */
+    public function getCheckoutSessionId()
+    {
+        if (!$this->amazonConfig->isEnabled()) {
+            return false;
+        }
+
+        $sessionId = $this->session->getAmazonCheckoutSessionId();
+        if (!$sessionId) {
+            $sessionId = $this->createCheckoutSessionId();
+        }
+        return $sessionId;
+    }
+
+    /**
+     * Create and save Amazon Checkout Session Id
+     */
+    protected function createCheckoutSessionId()
+    {
+        $response = $this->checkoutSessionManagement->createCheckoutSession();
+        if ($response) {
+            $sessionId = $response['checkoutSessionId'];
+            $this->session->setAmazonCheckoutSessionId($sessionId);
+            return $sessionId;
+        }
     }
 }

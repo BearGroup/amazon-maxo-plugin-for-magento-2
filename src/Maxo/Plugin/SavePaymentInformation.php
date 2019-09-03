@@ -32,7 +32,6 @@ class SavePaymentInformation
      */
     private $amazonCheckoutSession;
 
-
     /**
      * SavePaymentInformation constructor.
      * @param \Amazon\Maxo\Model\CheckoutSessionManagement $checkoutSessionManagement

@@ -1,4 +1,5 @@
-<?php
+<?xml version="1.0"?>
+<!--
 /**
  * Copyright © Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
@@ -13,28 +14,9 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-namespace Amazon\Maxo\Api;
-
-use Magento\Framework\Exception\LocalizedException;
-
-/**
- * @api
- */
-interface CheckoutSessionManagementInterface
-{
-    /**
-     * Create checkout session
-     *
-     * @return array
-     */
-    public function createCheckoutSession();
-
-    /**
-     * Complete checkout
-     *
-     * @param string $amazonCheckoutSessionId
-     *
-     * @return mixed
-     */
-    public function completeCheckout($amazonCheckoutSessionId);
-}
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Backend\Block\Widget\Form\Element\Dependence">
+        <plugin name="amazon_maxo_backend_field_dependence" type="Amazon\Maxo\Plugin\BackendFieldDependence" sortOrder="1" />
+    </type>
+</config>

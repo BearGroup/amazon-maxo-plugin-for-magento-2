@@ -63,9 +63,9 @@ class GenerateKeys
     public function generateKeys()
     {
         $rsa = new RsaOptions();
-        $rsa->generateKeys(array(
+        $rsa->generateKeys([
             'private_key_bits' => 2048,
-        ));
+        ]);
         $encrypt = $this->encryptor->encrypt((string) $rsa->getPrivateKey());
 
         $this->config

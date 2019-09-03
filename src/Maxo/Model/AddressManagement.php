@@ -18,7 +18,6 @@ namespace Amazon\Maxo\Model;
 use Magento\Framework\Validator\Exception as ValidatorException;
 use Magento\Framework\Webapi\Exception as WebapiException;
 
-
 class AddressManagement implements \Amazon\Maxo\Api\AddressManagementInterface
 {
     /**
@@ -27,7 +26,12 @@ class AddressManagement implements \Amazon\Maxo\Api\AddressManagementInterface
     private $storeManager;
 
     /**
-     * @var \Amazon\Maxo\Model\Adapter\AmazonMaxoAdapter
+     * @var AmazonConfig
+     */
+    private $amazonConfig;
+
+    /**
+     * @var Adapter\AmazonMaxoAdapter
      */
     private $amazonAdapter;
 
@@ -61,8 +65,21 @@ class AddressManagement implements \Amazon\Maxo\Api\AddressManagementInterface
      */
     private $logger;
 
+    /**
+     * AddressManagement constructor.
+     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param AmazonConfig $amazonConfig
+     * @param Adapter\AmazonMaxoAdapter $amazonAdapter
+     * @param \Amazon\Payment\Helper\Address $addressHelper
+     * @param \Magento\Checkout\Model\Session $session
+     * @param \Magento\Directory\Model\ResourceModel\Country\CollectionFactory $countryCollectionFactory
+     * @param \Amazon\Core\Domain\AmazonAddressFactory $amazonAddressFactory
+     * @param \Magento\Framework\Validator\Factory $validatorFactory
+     * @param \Psr\Log\LoggerInterface $logger
+     */
     public function __construct(
         \Magento\Store\Model\StoreManagerInterface $storeManager,
+        \Amazon\Maxo\Model\AmazonConfig $amazonConfig,
         \Amazon\Maxo\Model\Adapter\AmazonMaxoAdapter $amazonAdapter,
         \Amazon\Payment\Helper\Address $addressHelper,
         \Magento\Checkout\Model\Session $session,
@@ -71,14 +88,15 @@ class AddressManagement implements \Amazon\Maxo\Api\AddressManagementInterface
         \Magento\Framework\Validator\Factory $validatorFactory,
         \Psr\Log\LoggerInterface $logger
     ) {
-        $this->storeManager             = $storeManager;
-        $this->amazonAdapter            = $amazonAdapter;
-        $this->addressHelper            = $addressHelper;
-        $this->session                  = $session;
+        $this->storeManager = $storeManager;
+        $this->amazonConfig = $amazonConfig;
+        $this->amazonAdapter = $amazonAdapter;
+        $this->addressHelper = $addressHelper;
+        $this->session = $session;
         $this->countryCollectionFactory = $countryCollectionFactory;
-        $this->amazonAddressFactory     = $amazonAddressFactory;
-        $this->validatorFactory         = $validatorFactory;
-        $this->logger                   = $logger;
+        $this->amazonAddressFactory = $amazonAddressFactory;
+        $this->validatorFactory = $validatorFactory;
+        $this->logger = $logger;
     }
 
     /**
@@ -86,18 +104,25 @@ class AddressManagement implements \Amazon\Maxo\Api\AddressManagementInterface
      */
     public function getShippingAddress($amazonCheckoutSessionId)
     {
-        try {
-            $response = $this->amazonAdapter->getCheckoutSession($this->storeManager->getStore()->getId(), $amazonCheckoutSessionId);
+        if (!$this->amazonConfig->isEnabled()) {
+            return false;
+        }
 
-            if (isset($response->shippingAddress)) {
-                $shippingAddress = (array) $response->shippingAddress;
+        try {
+            $response = $this->amazonAdapter->getCheckoutSession(
+                $this->storeManager->getStore()->getId(),
+                $amazonCheckoutSessionId
+            );
+
+            if (isset($response['shippingAddress'])) {
+                $shippingAddress = $response['shippingAddress'];
                 $address = array_combine(
                     array_map('ucfirst', array_keys($shippingAddress)),
                     array_values($shippingAddress)
                 );
 
                 $address = $this->convertToMagentoAddress($address, true);
-                $address[0]['email'] = $response->buyer->email;
+                $address[0]['email'] = $response['buyer']['email'];
 
                 return $address;
             }
@@ -150,5 +175,4 @@ class AddressManagement implements \Amazon\Maxo\Api\AddressManagementInterface
 
         return [$this->addressHelper->convertToArray($magentoAddress)];
     }
-
 }

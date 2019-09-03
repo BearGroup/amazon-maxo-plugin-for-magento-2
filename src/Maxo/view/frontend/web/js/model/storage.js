@@ -18,7 +18,7 @@ define(
         'jquery',
         'ko',
         'Magento_Customer/js/customer-data',
-        'Amazon_Maxo/js/model/amazonMaxoConfig',
+        'Amazon_Maxo/js/model/amazon-maxo-config',
     ],
     function (
         $,
@@ -31,7 +31,8 @@ define(
         var isEnabled = amazonMaxoConfig.isDefined(),
             isShippingMethodsLoading = ko.observable(false),
             amazonCheckoutInfo = ko.observable(false),
-            cacheKey = 'is-amazon-checkout';
+            cacheKey = 'is-amazon-checkout',
+            sectionKey = 'amazon-checkout-session';
 
         return {
             isEnabled: isEnabled,
@@ -44,13 +45,16 @@ define(
             },
             clearAmazonCheckout: function() {
                 customerData.set(cacheKey, false);
-                customerData.set('amazon-checkout-session', false);
+                customerData.set(sectionKey, false);
             },
             getCheckoutSessionId: function() {
-                var checkoutSessionData = customerData.get('amazon-checkout-session');
+                var checkoutSessionData = customerData.get(sectionKey);
                 if (checkoutSessionData) {
                     return checkoutSessionData()['checkoutSessionId'];
                 }
+            },
+            reloadCheckoutSessionId: function() {
+                customerData.reload([sectionKey]);
             },
             isShippingMethodsLoading: isShippingMethodsLoading,
             amazonCheckoutInfo: amazonCheckoutInfo

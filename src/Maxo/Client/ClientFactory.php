@@ -49,7 +49,7 @@ class ClientFactory implements ClientFactoryInterface
      */
     public function __construct(
         \Amazon\Maxo\Model\AmazonConfig $amazonConfig,
-        \Magento\Framework\ObjectManagerInterface $objectManager,        
+        \Magento\Framework\ObjectManagerInterface $objectManager,
         \Psr\Log\LoggerInterface $logger,
         $instanceName = '\\AmazonPayV2\\ClientInterface'
     ) {

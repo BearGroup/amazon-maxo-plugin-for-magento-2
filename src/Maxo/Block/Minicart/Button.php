@@ -15,16 +15,8 @@
  */
 namespace Amazon\Maxo\Block\Minicart;
 
-use Magento\Checkout\Model\Session;
-use Amazon\Payment\Helper\Data;
-use Amazon\Core\Helper\Data as AmazonCoreHelper;
-use Amazon\Payment\Gateway\Config\Config;
-use Magento\Paypal\Block\Express\InContext;
 use Magento\Framework\View\Element\Template;
 use Magento\Catalog\Block\ShortcutInterface;
-use Magento\Framework\Locale\ResolverInterface;
-use Magento\Framework\View\Element\Template\Context;
-use Magento\Framework\App\Request\Http;
 
 /**
  * Class Button
@@ -43,71 +35,47 @@ class Button extends Template implements ShortcutInterface
     private $isMiniCart = false;
 
     /**
-     * @var ResolverInterface
+     * @var \Magento\Framework\Locale\ResolverInterface
      */
     private $localeResolver;
 
     /**
-     * @var Data
-     */
-    private $mainHelper;
-
-    /**
-     * @var Config
-     */
-    private $payment;
-
-    /**
-     * @var Session
-     */
-    private $session;
-
-    /**
-     * @var AmazonCoreHelper
-     */
-    private $coreHelper;
-
-    /**
-     * @var Http
+     * @var \Magento\Framework\App\Request\Http
      */
     private $request;
 
     /**
+     * @var \Magento\Store\Model\StoreManagerInterface
+     */
+    private $storeManager;
+
+    /**
+     * @var \Magento\Framework\App\Request\Http
+     */
+    private $amazonConfig;
+
+    /**
      * Button constructor.
-     *
-     * @param Context           $context
-     * @param ResolverInterface $localeResolver
-     * @param Data              $mainHelper
-     * @param Session           $session
-     * @param Config            $payment
-     * @param AmazonCoreHelper  $coreHelper
-     * @param Http              $request
-     * @param array             $data
+     * @param Template\Context $context
+     * @param \Magento\Framework\Locale\ResolverInterface $localeResolver
+     * @param \Magento\Framework\App\Request\Http $request
+     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param \Amazon\Maxo\Model\AmazonConfig $amazonConfig
+     * @param array $data
      */
     public function __construct(
-        Context $context,
-        ResolverInterface $localeResolver,
-        Data $mainHelper,
-        Session $session,
-        Config $payment,
-        AmazonCoreHelper $coreHelper,
-        Http $request,
+        \Magento\Framework\View\Element\Template\Context $context,
+        \Magento\Framework\Locale\ResolverInterface $localeResolver,
+        \Magento\Framework\App\Request\Http $request,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Amazon\Maxo\Model\AmazonConfig $amazonConfig,
-        \Amazon\Maxo\Model\Adapter\AmazonMaxoAdapter $amazonAdapter,
         array $data = []
     ) {
         parent::__construct($context, $data);
         $this->localeResolver = $localeResolver;
-        $this->mainHelper = $mainHelper;
-        $this->payment = $payment;
-        $this->session = $session;
-        $this->coreHelper = $coreHelper;
         $this->request = $request;
         $this->storeManager = $storeManager;
         $this->amazonConfig = $amazonConfig;
-        $this->amazonAdapter = $amazonAdapter;
-        $this->payment->setMethodCode($this->payment::CODE);
     }
 
     /**
@@ -115,11 +83,12 @@ class Button extends Template implements ShortcutInterface
      */
     protected function shouldRender()
     {
-        if ($this->getIsCart() && $this->payment->isActive($this->session->getQuote()->getStoreId())) {
+        if ($this->getIsCart() && $this->amazonConfig->isEnabled()) {
             return true;
         }
-        return $this->coreHelper->isPayButtonAvailableInMinicart()
-            && $this->payment->isActive($this->session->getQuote()->getStoreId())
+
+        return $this->amazonConfig->isEnabled()
+            && $this->amazonConfig->isPayButtonAvailableInMinicart()
             && $this->isMiniCart;
     }
 

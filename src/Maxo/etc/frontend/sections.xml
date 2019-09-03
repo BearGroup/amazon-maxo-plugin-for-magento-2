@@ -4,7 +4,4 @@
     <action name="checkout/cart/add">
         <section name="amazon-checkout-session"/>
     </action>
-    <action name="checkout/cart">
-        <section name="amazon-checkout-session"/>
-    </action>
 </config>

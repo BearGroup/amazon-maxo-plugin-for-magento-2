@@ -15,7 +15,7 @@
 define([
     'jquery',
     'Magento_Customer/js/customer-data',
-    'Amazon_Maxo/js/model/amazonMaxoConfig',
+    'Amazon_Maxo/js/model/amazon-maxo-config',
     'Amazon_Maxo/js/model/storage',
     'amazonMaxoCheckout'
 ], function ($, customerData, amazonMaxoConfig, amazonStorage) {
@@ -27,6 +27,10 @@ define([
              * Create button
              */
             _create: function () {
+                if (!amazonStorage.getCheckoutSessionId()) {
+                    amazonStorage.reloadCheckoutSessionId();
+                }
+
                 amazon.Pay.renderButton('.amazon-minicart-container-v2', {
                     merchantId: amazonMaxoConfig.getValue('merchantId'),
                     createCheckoutSession: function() {

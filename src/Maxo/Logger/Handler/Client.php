@@ -19,7 +19,7 @@ use Magento\Framework\Logger\Handler\Base;
 
 class Client extends Base
 {
-    const FILENAME = '/var/log/paywithamazon_maxo.log';
+    const FILENAME = '/var/log/paywithamazon_v2.log';
 
     /**
      * @var string

@@ -22,7 +22,6 @@
                 <item name="template" xsi:type="string">Amazon_Maxo::minicart-button.phtml</item>
                 <item name="alias" xsi:type="string">amazon.maxo.button.mini-cart</item>
             </argument>
-            <!--<argument name="maxo" xsi:type="object">Amazon\Maxo\Gateway\Config\Config</argument>-->
         </arguments>
     </type>
     <type name="Magento\Customer\CustomerData\SectionPoolInterface">

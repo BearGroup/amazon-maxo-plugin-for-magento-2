@@ -25,13 +25,14 @@ class AddAmazonButton implements \Magento\Framework\Event\ObserverInterface
     private $amazonConfig;
 
     /**
-     * @var ShortcutFactory
+     * @var \Amazon\Payment\Helper\Shortcut\Factory
      */
     private $shortcutFactory;
 
     /**
-     * @param Data $coreHelper
-     * @param ShortcutFactory $shortcutFactory
+     * AddAmazonButton constructor.
+     * @param \Amazon\Maxo\Model\AmazonConfig $amazonConfig
+     * @param \Amazon\Payment\Helper\Shortcut\Factory $shortcutFactory
      */
     public function __construct(
         \Amazon\Maxo\Model\AmazonConfig $amazonConfig,

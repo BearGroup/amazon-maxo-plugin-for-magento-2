@@ -13,28 +13,21 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-namespace Amazon\Maxo\Api;
 
-use Magento\Framework\Exception\LocalizedException;
+namespace Amazon\Maxo\Gateway\Http\Client;
 
 /**
- * @api
+ * Class Client
+ * Amazon Pay authorization gateway client
  */
-interface CheckoutSessionManagementInterface
+class AuthorizeClient extends AbstractClient
 {
     /**
-     * Create checkout session
-     *
-     * @return array
+     * @inheritdoc
      */
-    public function createCheckoutSession();
-
-    /**
-     * Complete checkout
-     *
-     * @param string $amazonCheckoutSessionId
-     *
-     * @return mixed
-     */
-    public function completeCheckout($amazonCheckoutSessionId);
+    protected function process(array $data)
+    {
+        $response = $this->adapter->authorize($data);
+        return $response;
+    }
 }

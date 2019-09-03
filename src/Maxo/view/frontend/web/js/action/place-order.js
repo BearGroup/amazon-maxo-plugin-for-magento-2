@@ -23,7 +23,7 @@ define(
         'Magento_Customer/js/model/customer',
         'Magento_Checkout/js/model/full-screen-loader',
         'Amazon_Maxo/js/model/storage',
-        'Amazon_Maxo/js/model/amazonMaxoConfig'
+        'Amazon_Maxo/js/model/amazon-maxo-config'
     ],
     function (quote, urlBuilder, storage, url, errorProcessor, customer, fullScreenLoader, amazonStorage, amazonConfig) {
         'use strict';

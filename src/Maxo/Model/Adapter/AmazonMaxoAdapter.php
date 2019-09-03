@@ -16,23 +16,64 @@
 
 namespace Amazon\Maxo\Model\Adapter;
 
+/**
+ * Class AmazonMaxoAdapter
+ */
 class AmazonMaxoAdapter
 {
+    /**
+     * @var \Amazon\Maxo\Client\ClientFactoryInterface
+     */
+    private $clientFactory;
 
+    /**
+     * @var \Amazon\Maxo\Model\AmazonConfig
+     */
+    private $amazonConfig;
+
+    /**
+     * @var \Magento\Store\Model\StoreManagerInterface
+     */
+    private $storeManager;
+
+    /**
+     * @var \Magento\Quote\Api\CartRepositoryInterface
+     */
+    private $quoteRepository;
+
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * AmazonMaxoAdapter constructor.
+     * @param \Amazon\Maxo\Client\ClientFactoryInterface $clientFactory
+     * @param \Amazon\Maxo\Model\AmazonConfig $amazonConfig
+     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param \Magento\Quote\Api\CartRepositoryInterface $quoteRepository
+     * @param \Psr\Log\LoggerInterface $logger
+     */
     public function __construct(
         \Amazon\Maxo\Client\ClientFactoryInterface $clientFactory,
         \Amazon\Maxo\Model\AmazonConfig $amazonConfig,
-        \Amazon\Core\Helper\Data $amazonHelper,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
+        \Magento\Quote\Api\CartRepositoryInterface $quoteRepository,
         \Psr\Log\LoggerInterface $logger
     ) {
         $this->clientFactory = $clientFactory;
         $this->amazonConfig = $amazonConfig;
-        $this->amazonHelper = $amazonHelper;
         $this->storeManager = $storeManager;
+        $this->quoteRepository = $quoteRepository;
         $this->logger = $logger;
     }
 
+    /**
+     * Create new Amazon Checkout Session
+     *
+     * @param $storeId
+     * @return mixed
+     */
     public function createCheckoutSession($storeId)
     {
         $payload = [
@@ -48,23 +89,30 @@ class AmazonMaxoAdapter
 
         $response = $this->clientFactory->create($storeId)->createCheckoutSession($payload, $headers);
 
-        if (!$response || (isset($response['response']) && strpos($response['response'],'checkoutSessionId') === false)) {
+        if (!$response || (isset($response['response'])
+                && strpos($response['response'], 'checkoutSessionId') === false)) {
             $this->logger->debug(__('Unable to create checkout session'));
         } else {
-            return json_decode($response['response']);
+            return json_decode($response['response'], true);
         }
     }
 
+    /**
+     * Return checkout session details
+     *
+     * @param $storeId
+     * @param $checkoutSessionId
+     * @return mixed
+     */
     public function getCheckoutSession($storeId, $checkoutSessionId)
     {
-        //return json_decode('{"checkoutSessionId":"2b577683-babc-459f-ae08-0f75f9c59bfb","webCheckoutDetails":{"checkoutReviewReturnUrl":"https://ap.stage.beargroup.com/checkout/","checkoutResultReturnUrl":null,"amazonPayRedirectUrl":null},"productType":"PayAndShip","paymentDetails":{"paymentIntent":null,"canHandlePendingAuthorization":false,"chargeAmount":null,"softDescriptor":null},"merchantMetadata":{"merchantReferenceId":null,"merchantStoreName":null,"noteToBuyer":null,"customInformation":null},"supplementaryData":null,"buyer":{"name":"Jonah Ellison","email":"jonah@beargroup.com","buyerId":"amzn1.account.A07479412FGBCH8846CXM"},"paymentPreferences":[{"billingAddress":null,"paymentDescriptor":"AmazonPay"}],"statusDetails":{"state":"Open","reasonCode":null,"reasonDescription":null,"lastUpdatedTimestamp":"20190822T024530Z"},"shippingAddress":{"name":"Jack Smith","addressLine1":"83034 Terry Ave","addressLine2":null,"addressLine3":null,"city":"Seattle","county":null,"district":null,"stateOrRegion":"WA","postalCode":"98121","countryCode":"US"},"platformId":null,"chargePermissionId":null,"chargeId":null,"constraints":[{"constraintId":"ChargeAmountNotSet","description":"chargeAmount is not set."},{"constraintId":"CheckoutResultReturnUrlNotSet","description":"checkoutResultReturnUrl is not set."},{"constraintId":"PaymentIntentNotSet","description":"paymentIntent is not set."}],"creationTimestamp":"20190822T024512Z","expirationTimestamp":"20190823T024512Z","storeId":"amzn1.application-oa2-client.6f774de2482149b18e5df3796d0aef0f","providerMetadata":{"providerReferenceId":null},"releaseEnvironment":"Sandbox"}');
-
         $response = $this->clientFactory->create($storeId)->getCheckoutSession($checkoutSessionId);
 
-        if (!$response || (isset($response['response']) && strpos($response['response'],'checkoutSessionId') === false)) {
+        if (!$response || (isset($response['response'])
+                && strpos($response['response'], 'checkoutSessionId') === false)) {
             $this->logger->debug(__('Unable to get checkout session'));
         } else {
-            return json_decode($response['response']);
+            return json_decode($response['response'], true);
         }
     }
 
@@ -80,9 +128,20 @@ class AmazonMaxoAdapter
         $storeId = $quote->getStoreId();
         $store = $quote->getStore();
 
+        if (!$quote->getReservedOrderId()) {
+            try {
+                $quote->reserveOrderId()->save();
+            } catch (\Exception $e) {
+                $this->logger->debug($e->getMessage());
+            }
+        }
+
         $payload = [
             'webCheckoutDetails' => [
-                'checkoutResultReturnUrl' => $store->getUrl('amazon_maxo/payment/completeCheckout', ['_forced_secure' => true])
+                'checkoutResultReturnUrl' => $store->getUrl(
+                    'amazon_maxo/payment/completeCheckout',
+                    ['_forced_secure' => true]
+                )
             ],
             'paymentDetails' => [
                 'paymentIntent' => 'Authorize',
@@ -93,8 +152,8 @@ class AmazonMaxoAdapter
                 ],
             ],
             'merchantMetadata' => [
-                'merchantReferenceId' => $this->amazonConfig->getMerchantId(),
-                'merchantStoreName' => $this->amazonHelper->getStoreName() ?? $store->getName(),
+                'merchantReferenceId' => $quote->getReservedOrderId(),
+                'merchantStoreName' => $store->getName(),
                 //noteToBuyer => '',
                 //customInformation => '',
             ]
@@ -102,13 +161,75 @@ class AmazonMaxoAdapter
 
         $response = $this->clientFactory->create($storeId)->updateCheckoutSession($checkoutSessionId, $payload);
 
-        if (!$response || (isset($response['response']) && strpos($response['response'],'checkoutSessionId') === false)) {
+        if (!$response ||
+            (isset($response['response']) && strpos($response['response'], 'checkoutSessionId') === false)) {
             $this->logger->debug(__('Unable to update checkout session'));
         } else {
-            return json_decode($response['response']);
+            return json_decode($response['response'], true);
         }
     }
 
+    /**
+     * Create charge
+     *
+     * @param $storeId
+     * @param $chargeId
+     * @param $amount
+     * @param $currency
+     * @return mixed
+     */
+    public function captureCharge($storeId, $chargeId, $amount, $currency)
+    {
+        $headers = [
+            'x-amz-pay-idempotency-key' => uniqid(),
+        ];
 
+        $payload = [
+            'captureAmount' => [
+                'amount' => $amount,
+                'currencyCode' => $currency,
+            ]
+        ];
 
+        $response = $this->clientFactory->create($storeId)->captureCharge($chargeId, $payload, $headers);
+
+        if (!isset($response['response'])) {
+            $this->logger->debug(__('Unable to capture charge'));
+        } else {
+            return json_decode($response['response'], true);
+        }
+    }
+
+    /**
+     * Cancel charge
+     *
+     * @param $storeId
+     * @param $chargeId
+     */
+    public function cancelCharge($storeId, $chargeId, $reason = 'ADMIN VOID')
+    {
+        $payload = [
+            'cancellationReason' => $reason
+        ];
+
+        $response = $this->clientFactory->create($storeId)->cancelCharge($chargeId, $payload);
+
+        if (!isset($response['response'])) {
+            $this->logger->debug(__('Unable to cancel charge'));
+        } else {
+            return json_decode($response['response'], true);
+        }
+    }
+
+    /**
+     * Authorize Gateway Command
+     *
+     * @param $data
+     */
+    public function authorize($data)
+    {
+        $quote = $this->quoteRepository->get($data['quote_id']);
+        $response = $this->getCheckoutSession($quote->getStoreId(), $data['amazon_checkout_session_id']);
+        return $response;
+    }
 }
