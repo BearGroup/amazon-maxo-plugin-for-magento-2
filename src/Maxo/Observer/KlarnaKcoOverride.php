@@ -20,7 +20,7 @@ use Magento\Framework\Event\Observer;
 class KlarnaKcoOverride implements \Magento\Framework\Event\ObserverInterface
 {
     /**
-     * @var \Amazon\Maxo\Model\Config
+     * @var \Amazon\Maxo\Model\AmazonConfig
      */
     private $amazonConfig;
 
@@ -29,8 +29,13 @@ class KlarnaKcoOverride implements \Magento\Framework\Event\ObserverInterface
      */
     private $sessionHelper;
 
+    /**
+     * KlarnaKcoOverride constructor.
+     * @param \Amazon\Maxo\Model\AmazonConfig $amazonConfig
+     * @param \Amazon\Login\Helper\Session $sessionHelper
+     */
     public function __construct(
-        \Amazon\Maxo\Model\Config $amazonConfig,
+        \Amazon\Maxo\Model\AmazonConfig $amazonConfig,
         \Amazon\Login\Helper\Session $sessionHelper
     ) {
         $this->amazonConfig = $amazonConfig;
