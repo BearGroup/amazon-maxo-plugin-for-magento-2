@@ -31,7 +31,7 @@ define([
                     amazonStorage.reloadCheckoutSessionId();
                 }
 
-                amazon.Pay.renderButton('.amazon-minicart-container-v2', {
+                amazon.Pay.renderButton('.amazon-checkout-button', {
                     merchantId: amazonMaxoConfig.getValue('merchantId'),
                     createCheckoutSession: function() {
                         return new Promise(function(resolve, reject) {
@@ -44,6 +44,7 @@ define([
                     placement: amazonMaxoConfig.getValue('placement'),
                     sandbox: amazonMaxoConfig.getValue('sandbox'),
                 });
+                $('.amazon-button-container-v2 .field-tooltip').fadeIn();
             }
         });
 

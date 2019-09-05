@@ -359,6 +359,32 @@ class AmazonConfig
     /*
      * @return string
      */
+    public function getPaymentAction($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
+    {
+        return $this->scopeConfig->getValue(
+            'payment/amazon_payment/payment_action',
+            $scope,
+            $scopeCode
+        );
+    }
+
+    /*
+     * @return bool
+     */
+    public function isAsyncAuthorization($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
+    {
+        $paymentAction = $this->getPaymentAction($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null);
+
+        return $paymentAction == 'authorize' && $this->scopeConfig->getValue(
+            'payment/amazon_payment/authorization_mode',
+            $scope,
+            $scopeCode
+        ) == 'synchronous_possible';
+    }
+
+    /*
+     * @return string
+     */
     public function getCheckoutReviewReturnUrl()
     {
         return $this->storeManager->getStore()->getUrl('checkout', ['_forced_secure' => true]);

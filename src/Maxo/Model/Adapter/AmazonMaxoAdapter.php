@@ -76,6 +76,8 @@ class AmazonMaxoAdapter
      */
     public function createCheckoutSession($storeId)
     {
+        $headers = $this->getIdempotencyHeader();
+
         $payload = [
             'webCheckoutDetails' => [
                 'checkoutReviewReturnUrl' => $this->amazonConfig->getCheckoutReviewReturnUrl(),
@@ -83,18 +85,9 @@ class AmazonMaxoAdapter
             'storeId' => $this->amazonConfig->getClientId(),
         ];
 
-        $headers = [
-            'x-amz-pay-idempotency-key' => uniqid(),
-        ];
-
         $response = $this->clientFactory->create($storeId)->createCheckoutSession($payload, $headers);
 
-        if (!$response || (isset($response['response'])
-                && strpos($response['response'], 'checkoutSessionId') === false)) {
-            $this->logger->debug(__('Unable to create checkout session'));
-        } else {
-            return json_decode($response['response'], true);
-        }
+        return $this->processResponse($response, __FUNCTION__);
     }
 
     /**
@@ -108,12 +101,7 @@ class AmazonMaxoAdapter
     {
         $response = $this->clientFactory->create($storeId)->getCheckoutSession($checkoutSessionId);
 
-        if (!$response || (isset($response['response'])
-                && strpos($response['response'], 'checkoutSessionId') === false)) {
-            $this->logger->debug(__('Unable to get checkout session'));
-        } else {
-            return json_decode($response['response'], true);
-        }
+        return $this->processResponse($response, __FUNCTION__);
     }
 
     /**
@@ -144,10 +132,10 @@ class AmazonMaxoAdapter
                 )
             ],
             'paymentDetails' => [
-                'paymentIntent' => 'Authorize',
-                'canHandlePendingAuthorization' => true,
+                'paymentIntent' => $this->amazonConfig->isAsyncAuthorization() ? 'Confirm' : 'Authorize',
+                'canHandlePendingAuthorization' => !$this->amazonConfig->isAsyncAuthorization(),
                 'chargeAmount' => [
-                    'amount' => number_format($quote->getGrandTotal(), 2),
+                    'amount' => $quote->getGrandTotal(),
                     'currencyCode' => $store->getCurrentCurrency()->getCode(),
                 ],
             ],
@@ -161,16 +149,37 @@ class AmazonMaxoAdapter
 
         $response = $this->clientFactory->create($storeId)->updateCheckoutSession($checkoutSessionId, $payload);
 
-        if (!$response ||
-            (isset($response['response']) && strpos($response['response'], 'checkoutSessionId') === false)) {
-            $this->logger->debug(__('Unable to update checkout session'));
-        } else {
-            return json_decode($response['response'], true);
-        }
+        return $this->processResponse($response, __FUNCTION__);
     }
 
     /**
      * Create charge
+     *
+     * @param $storeId
+     * @param $chargePermissionId
+     * @param $amount
+     * @param $currency
+     * @return mixed
+     */
+    public function createCharge($storeId, $chargePermissionId, $amount, $currency)
+    {
+        $headers = $this->getIdempotencyHeader();
+
+        $payload = [
+            'chargePermissionId' => $chargePermissionId,
+            'chargeAmount' => [
+                'amount' => $amount,
+                'currencyCode' => $currency,
+            ]
+        ];
+
+        $response = $this->clientFactory->create($storeId)->createCharge($payload, $headers);
+
+        return $this->processResponse($response, __FUNCTION__);
+    }
+
+    /**
+     * Capture charge
      *
      * @param $storeId
      * @param $chargeId
@@ -180,9 +189,7 @@ class AmazonMaxoAdapter
      */
     public function captureCharge($storeId, $chargeId, $amount, $currency)
     {
-        $headers = [
-            'x-amz-pay-idempotency-key' => uniqid(),
-        ];
+        $headers = $this->getIdempotencyHeader();
 
         $payload = [
             'captureAmount' => [
@@ -193,11 +200,33 @@ class AmazonMaxoAdapter
 
         $response = $this->clientFactory->create($storeId)->captureCharge($chargeId, $payload, $headers);
 
-        if (!isset($response['response'])) {
-            $this->logger->debug(__('Unable to capture charge'));
-        } else {
-            return json_decode($response['response'], true);
-        }
+        return $this->processResponse($response, __FUNCTION__);
+    }
+
+    /**
+     * Create refund
+     *
+     * @param $storeId
+     * @param $chargeId
+     * @param $amount
+     * @param $currency
+     * @return mixed
+     */
+    public function createRefund($storeId, $chargeId, $amount, $currency)
+    {
+        $headers = $this->getIdempotencyHeader();
+
+        $payload = [
+            'chargeId' => $chargeId,
+            'refundAmount' => [
+                'amount' => $amount,
+                'currencyCode' => $currency,
+            ]
+        ];
+
+        $response = $this->clientFactory->create($storeId)->createRefund($payload, $headers);
+
+        return $this->processResponse($response, __FUNCTION__);
     }
 
     /**
@@ -214,11 +243,7 @@ class AmazonMaxoAdapter
 
         $response = $this->clientFactory->create($storeId)->cancelCharge($chargeId, $payload);
 
-        if (!isset($response['response'])) {
-            $this->logger->debug(__('Unable to cancel charge'));
-        } else {
-            return json_decode($response['response'], true);
-        }
+        return $this->processResponse($response, __FUNCTION__);
     }
 
     /**
@@ -226,10 +251,55 @@ class AmazonMaxoAdapter
      *
      * @param $data
      */
-    public function authorize($data)
+    public function authorize($data, $captureNow = false)
     {
         $quote = $this->quoteRepository->get($data['quote_id']);
         $response = $this->getCheckoutSession($quote->getStoreId(), $data['amazon_checkout_session_id']);
+        if ($captureNow && !empty($response['chargeId'])) {
+            $response = $this->captureCharge(
+                $quote->getStoreId(),
+                $response['chargeId'],
+                $quote->getGrandTotal(),
+                $quote->getStore()->getCurrentCurrency()->getCode()
+            );
+        }
         return $response;
+    }
+
+    /**
+     * Process SDK client response
+     *
+     * @param $clientResponse
+     * @param $functionName
+     * @return array
+     */
+    protected function processResponse($clientResponse, $functionName)
+    {
+        $response = [];
+
+        if (!isset($clientResponse['response'])) {
+            $this->logger->debug(__('Unable to ' . $functionName));
+        } else {
+            $response = json_decode($clientResponse['response'], true);
+        }
+
+        // Add HTTP response status code
+        if (isset($clientResponse['status'])) {
+            $response['status'] = $clientResponse['status'];
+        }
+
+        return $response;
+    }
+
+    /**
+     * Generate idempotency header
+     *
+     * @return array
+     */
+    protected function getIdempotencyHeader()
+    {
+        return [
+            'x-amz-pay-idempotency-key' => uniqid(),
+        ];
     }
 }

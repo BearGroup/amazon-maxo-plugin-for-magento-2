@@ -106,7 +106,7 @@ class SubjectReader
     /**
      * @return \Magento\Quote\Model\Quote
      */
-    public function getQuote()
+    public function getCheckoutQuote()
     {
         return $this->checkoutSession->getQuote();
     }
@@ -114,7 +114,7 @@ class SubjectReader
     /**
      * @return \Magento\Sales\Model\Order
      */
-    public function getOrder()
+    public function getCheckoutOrder()
     {
         return $this->checkoutSession->getLastRealOrder();
     }

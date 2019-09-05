@@ -13,22 +13,25 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-namespace Amazon\Maxo\Client;
 
-use AmazonPayV2\Client as AmazonClient;
+namespace Amazon\Maxo\Gateway\Http\Client;
 
 /**
- * Class Client
+ * Class RefundClient
  */
-class Client extends AmazonClient
+class RefundClient extends AbstractClient
 {
     /**
-     * Client constructor
-     *
-     * @param array $amazonConfig
+     * @inheritdoc
      */
-    public function __construct(array $amazonConfig)
+    protected function process(array $data)
     {
-        parent::__construct($amazonConfig);
+        $response = $this->adapter->createRefund(
+            $data['store_id'],
+            $data['charge_id'],
+            $data['amount'],
+            $data['currency_code']
+        );
+        return $response;
     }
 }

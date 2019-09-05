@@ -16,11 +16,12 @@
 
 namespace Amazon\Maxo\Gateway\Response;
 
-use Magento\Payment\Gateway\Response\HandlerInterface;
 use Amazon\Maxo\Gateway\Helper\SubjectReader;
 use Amazon\Maxo\Model\AsyncManagement;
+use Magento\Payment\Gateway\Response\HandlerInterface;
+use Magento\Sales\Model\Order\Payment;
 
-class SettlementHandler implements HandlerInterface
+class SaleHandler implements HandlerInterface
 {
     /**
      * @var SubjectReader
@@ -33,7 +34,7 @@ class SettlementHandler implements HandlerInterface
     private $asyncManagement;
 
     /**
-     * SettlementHandler constructor.
+     * SaleHandler constructor.
      * @param SubjectReader $subjectReader
      * @param AsyncManagement $asyncManagement
      */
@@ -52,12 +53,24 @@ class SettlementHandler implements HandlerInterface
     public function handle(array $handlingSubject, array $response)
     {
         $paymentDO = $this->subjectReader->readPayment($handlingSubject);
-        $payment = $paymentDO->getPayment();
 
-        if (isset($response['chargeId'])) {
-            $payment->setTransactionId($response['chargeId'].'-capture');
-            $payment->setParentTransactionId($response['chargeId']);
-            $payment->setIsTransactionClosed(true);
+        /** @var Payment $orderPayment */
+        $orderPayment = $paymentDO->getPayment();
+
+        // Successful Authorization
+        if (!empty($response['chargeId'])) {
+            $orderPayment->setTransactionId($response['chargeId']);
+            $orderPayment->setIsTransactionClosed(true);
+        } else { // Pending Authorization
+            $order = $this->subjectReader->getCheckoutOrder();
+
+            $orderPayment->setIsTransactionPending(true);
+            $orderPayment->setTransactionId($response['chargePermissionId']);
+            $order->setState(\Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW)->setStatus(
+                \Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW
+            );
+            $this->asyncManagement->queuePendingAuthorization($response['chargePermissionId']);
+            $orderPayment->setIsTransactionClosed(false);
         }
     }
 }

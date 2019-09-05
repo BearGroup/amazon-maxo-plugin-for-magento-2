@@ -116,6 +116,8 @@ class AddressManagement implements \Amazon\Maxo\Api\AddressManagementInterface
 
             if (isset($response['shippingAddress'])) {
                 $shippingAddress = $response['shippingAddress'];
+                $shippingAddress['state'] = $shippingAddress['stateOrRegion'];
+
                 $address = array_combine(
                     array_map('ucfirst', array_keys($shippingAddress)),
                     array_values($shippingAddress)

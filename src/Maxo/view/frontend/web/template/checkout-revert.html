@@ -1,4 +1,4 @@
-<?php
+<!--
 /**
  * Copyright © Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
@@ -13,22 +13,10 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-namespace Amazon\Maxo\Client;
+-->
 
-use AmazonPayV2\Client as AmazonClient;
-
-/**
- * Class Client
- */
-class Client extends AmazonClient
-{
-    /**
-     * Client constructor
-     *
-     * @param array $amazonConfig
-     */
-    public function __construct(array $amazonConfig)
-    {
-        parent::__construct($amazonConfig);
-    }
-}
+<!-- ko if: (isAmazonCheckout) -->
+    <a href="javascript:;" data-bind="click: revertCheckout" class="revert-checkout">
+        <!-- ko i18n: 'Return to standard checkout' --><!--/ko-->
+    </a>
+<!--/ko-->

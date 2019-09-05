@@ -37,14 +37,13 @@ class AuthorizationRequestBuilder implements BuilderInterface
     }
 
     /**
-     * Builds ENV request
-     *
-     * @param  array $buildSubject
-     * @return array
+     * @inheritdoc
      */
     public function build(array $buildSubject)
     {
-        $quote = $this->subjectReader->getQuote();
+        // Used for Authorization and Sale
+
+        $quote = $this->subjectReader->getCheckoutQuote();
 
         return [
             'quote_id' => $quote->getId(),

@@ -23,9 +23,9 @@ define(
         'Magento_Customer/js/model/customer',
         'Magento_Checkout/js/model/full-screen-loader',
         'Amazon_Maxo/js/model/storage',
-        'Amazon_Maxo/js/model/amazon-maxo-config'
+        'mage/translate'
     ],
-    function (quote, urlBuilder, storage, url, errorProcessor, customer, fullScreenLoader, amazonStorage, amazonConfig) {
+    function (quote, urlBuilder, storage, url, errorProcessor, customer, fullScreenLoader, amazonStorage, $t) {
         'use strict';
 
         return function (paymentData, redirectOnSuccess) {
@@ -61,13 +61,14 @@ define(
             ).done(
                 function (response) {
                     // Redirect URL
-                    if (response.indexOf('http') == 0) {
+                    if (response !== true && response.indexOf('http') == 0) {
                         amazonStorage.clearAmazonCheckout();
                         window.location.replace(response);
                     } else {
-                        errorProcessor.process(response);
-                        console.log(response);
                         fullScreenLoader.stopLoader(true);
+                        console.log('Invalid Amazon RedirectUrl:');
+                        console.log(response);
+                        errorProcessor.process(response);
                     }
                 }
             ).fail(

@@ -13,51 +13,68 @@
  * permissions and limitations under the License.
  */
 
-define(
-    [
-        'jquery',
-        'ko',
-        'Magento_Customer/js/customer-data',
-        'Amazon_Maxo/js/model/amazon-maxo-config',
-    ],
-    function (
-        $,
-        ko,
-        customerData,
-        amazonMaxoConfig
-    ) {
-        'use strict';
+define([
+    'jquery',
+    'ko',
+    'Magento_Customer/js/customer-data',
+    'Amazon_Maxo/js/model/amazon-maxo-config',
+], function ($, ko, customerData, amazonMaxoConfig) {
+    'use strict';
 
-        var isEnabled = amazonMaxoConfig.isDefined(),
-            isShippingMethodsLoading = ko.observable(false),
-            amazonCheckoutInfo = ko.observable(false),
-            cacheKey = 'is-amazon-checkout',
-            sectionKey = 'amazon-checkout-session';
+    var isEnabled = amazonMaxoConfig.isDefined(),
+        isShippingMethodsLoading = ko.observable(false),
+        cacheKey = 'is-amazon-checkout',
+        sectionKey = 'amazon-checkout-session';
 
-        return {
-            isEnabled: isEnabled,
-            isAmazonCheckout: function() {
-                var isAmazon = window.location.search.indexOf('amazonCheckoutSessionId') != -1;
-                if (isAmazon) {
-                    customerData.set(cacheKey, true);
-                }
-                return customerData.get(cacheKey)();
-            },
-            clearAmazonCheckout: function() {
-                customerData.set(cacheKey, false);
-                customerData.set(sectionKey, false);
-            },
-            getCheckoutSessionId: function() {
-                var checkoutSessionData = customerData.get(sectionKey);
-                if (checkoutSessionData) {
-                    return checkoutSessionData()['checkoutSessionId'];
-                }
-            },
-            reloadCheckoutSessionId: function() {
-                customerData.reload([sectionKey]);
-            },
-            isShippingMethodsLoading: isShippingMethodsLoading,
-            amazonCheckoutInfo: amazonCheckoutInfo
-        };
-    }
-);
+    return {
+        isEnabled: isEnabled,
+        isShippingMethodsLoading: isShippingMethodsLoading,
+
+        /**
+         * Is checkout using Amazon MAXO?
+         *
+         * @returns {boolean}
+         */
+        isAmazonCheckout: function() {
+            var isAmazon = window.location.search.indexOf('amazonCheckoutSessionId') != -1; // via redirect
+            if (isAmazon) {
+                customerData.set(cacheKey, true);
+            }
+            return customerData.get(cacheKey)() === true;
+        },
+
+        /**
+         * Revert to standard checkout (e.g. onepage)
+         */
+        revertCheckout: function() {
+            customerData.set(cacheKey, false);
+        },
+
+        /**
+         * Clear Amazon Checkout Session ID and revert checkout
+         */
+        clearAmazonCheckout: function() {
+            customerData.set(sectionKey, false);
+            this.revertCheckout();
+        },
+
+        /**
+         * Return Amazon Checkout Session ID
+         *
+         * @returns {*}
+         */
+        getCheckoutSessionId: function() {
+            var checkoutSessionData = customerData.get(sectionKey);
+            if (checkoutSessionData) {
+                return checkoutSessionData()['checkoutSessionId'];
+            }
+        },
+
+        /**
+         * Reinit Amazon Checkout Session ID via Ajax
+         */
+        reloadCheckoutSessionId: function() {
+            customerData.reload([sectionKey]);
+        }
+    };
+});

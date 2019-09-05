@@ -13,22 +13,17 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-namespace Amazon\Maxo\Client;
+namespace Amazon\Maxo\Model\ResourceModel\Async;
 
-use AmazonPayV2\Client as AmazonClient;
+use Generator;
+use Amazon\Maxo\Api\Data\AsyncInterface;
+use Amazon\Maxo\Model\Async as AsyncModel;
+use Amazon\Maxo\Model\ResourceModel\Async as AsyncResourceModel;
 
-/**
- * Class Client
- */
-class Client extends AmazonClient
+class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
 {
-    /**
-     * Client constructor
-     *
-     * @param array $amazonConfig
-     */
-    public function __construct(array $amazonConfig)
+    protected function _construct()
     {
-        parent::__construct($amazonConfig);
+        $this->_init(AsyncModel::class, AsyncResourceModel::class);
     }
 }

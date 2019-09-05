@@ -29,7 +29,9 @@ define(
              */
             initialize: function () {
                 this._super();
-                this.isNewAddressAdded(amazonStorage.isAmazonCheckout());
+                if (amazonStorage.isAmazonCheckout()) {
+                    this.isNewAddressAdded(true);
+                }
                 return this;
             },
 

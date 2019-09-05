@@ -16,9 +16,7 @@
 
 namespace Amazon\Maxo\Plugin;
 
-use Magento\Quote\Api\PaymentMethodManagementInterface;
 use Amazon\Maxo\Gateway\Config\Config as GatewayConfig;
-use Magento\Quote\Api\CartRepositoryInterface;
 
 class SavePaymentInformation
 {
@@ -33,16 +31,24 @@ class SavePaymentInformation
     private $amazonCheckoutSession;
 
     /**
+     * @var \Magento\Quote\Api\CartRepositoryInterface
+     */
+    private $cartRepository;
+
+    /**
      * SavePaymentInformation constructor.
      * @param \Amazon\Maxo\Model\CheckoutSessionManagement $checkoutSessionManagement
      * @param \Amazon\Maxo\CustomerData\CheckoutSession $amazonCheckoutSession
+     * @param \Magento\Quote\Api\CartRepositoryInterface $cartRepository
      */
     public function __construct(
         \Amazon\Maxo\Model\CheckoutSessionManagement $checkoutSessionManagement,
-        \Amazon\Maxo\CustomerData\CheckoutSession $amazonCheckoutSession
+        \Amazon\Maxo\CustomerData\CheckoutSession $amazonCheckoutSession,
+        \Magento\Quote\Api\CartRepositoryInterface $cartRepository
     ) {
         $this->checkoutSessionManagement = $checkoutSessionManagement;
         $this->amazonCheckoutSession = $amazonCheckoutSession;
+        $this->cartRepository = $cartRepository;
     }
 
     /**
@@ -56,19 +62,34 @@ class SavePaymentInformation
      */
     public function afterSavePaymentInformation(
         $subject,
+        $result,
         $cartId,
         \Magento\Quote\Api\Data\PaymentInterface $paymentMethod,
-        \Magento\Quote\Api\Data\AddressInterface $billingAddress,
-        $result
+        \Magento\Quote\Api\Data\AddressInterface $billingAddress
     ) {
         if ($paymentMethod->getMethod() == GatewayConfig::CODE) {
+            $quote = $this->cartRepository->getActive($cartId);
 
             return $this->checkoutSessionManagement->updateCheckoutSession(
-                $cartId,
+                $quote,
                 $this->amazonCheckoutSession->getCheckoutSessionId()
             );
 
         }
         return $result;
+    }
+
+    /**
+     * Get Cart repository
+     *
+     * @return \Magento\Quote\Api\CartRepositoryInterface
+     */
+    private function getCartRepository()
+    {
+        if (!$this->cartRepository) {
+            $this->cartRepository = \Magento\Framework\App\ObjectManager::getInstance()
+                ->get(\Magento\Quote\Api\CartRepositoryInterface::class);
+        }
+        return $this->cartRepository;
     }
 }

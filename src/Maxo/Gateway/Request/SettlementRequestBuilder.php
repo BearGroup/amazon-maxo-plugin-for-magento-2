@@ -37,14 +37,11 @@ class SettlementRequestBuilder implements BuilderInterface
     }
 
     /**
-     * Builds ENV request
-     *
-     * @param  array $buildSubject
-     * @return array
+     * @inheritdoc
      */
     public function build(array $buildSubject)
     {
-        $data = [];
+        // Used for Settlement and Refund
 
         $paymentDO = $this->subjectReader->readPayment($buildSubject);
         $orderDO = $paymentDO->getOrder();
@@ -55,7 +52,7 @@ class SettlementRequestBuilder implements BuilderInterface
 
         $data = [
             'store_id' => $storeId,
-            'charge_id' => $paymentDO->getPayment()->getParentTransactionId(),
+            'charge_id' => rtrim($paymentDO->getPayment()->getParentTransactionId(), '-capture'),
             'amount' => $total,
             'currency_code' => $currencyCode,
         ];

@@ -17,50 +17,27 @@
 namespace Amazon\Maxo\Gateway\Request;
 
 use Magento\Payment\Gateway\Request\BuilderInterface;
-use Magento\Framework\App\ProductMetadata;
 use Amazon\Maxo\Gateway\Helper\SubjectReader;
-use Magento\Sales\Api\OrderRepositoryInterface;
 
 class VoidRequestBuilder implements BuilderInterface
 {
-
-    /**
-     * @var ProductMetadata
-     */
-    private $productMetaData;
-
     /**
      * @var SubjectReader
      */
     private $subjectReader;
 
     /**
-     * @var OrderRepositoryInterface
-     */
-    private $orderRepository;
-
-    /**
      * VoidRequestBuilder constructor.
-     *
-     * @param ProductMetadata          $productMetadata
-     * @param SubjectReader            $subjectReader
-     * @param OrderRepositoryInterface $orderRepository
+     * @param SubjectReader $subjectReader
      */
     public function __construct(
-        ProductMetaData $productMetadata,
-        SubjectReader $subjectReader,
-        OrderRepositoryInterface $orderRepository
+        SubjectReader $subjectReader
     ) {
-        $this->productMetaData = $productMetadata;
         $this->subjectReader = $subjectReader;
-        $this->orderRepository = $orderRepository;
     }
 
     /**
-     * Builds ENV request
-     *
-     * @param  array $buildSubject
-     * @return array
+     * @inheritdoc
      */
     public function build(array $buildSubject)
     {

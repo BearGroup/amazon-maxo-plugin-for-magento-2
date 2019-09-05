@@ -67,7 +67,7 @@ class CheckoutProcessor
 
             $paymentConfig['children']['payments-list']['component'] = 'Amazon_Maxo/js/view/payment/list';
         } else {
-            unset($shippingConfig['children']['customer-email']['children']['amazon-button-region']);
+            unset($shippingConfig['children']['customer-email']['children']['amazon-maxo-button-region']);
             unset($shippingConfig['children']['before-form']['children']['amazon-maxo-address']);
             unset($paymentConfig['children']['renders']['children']['amazon_payment']);
             unset($paymentConfig['children']['payments-list']['children']['amazon_payment-form']);

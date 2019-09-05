@@ -13,22 +13,20 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-namespace Amazon\Maxo\Client;
 
-use AmazonPayV2\Client as AmazonClient;
+namespace Amazon\Maxo\Gateway\Http\Client;
 
 /**
- * Class Client
+ * Class SaleClient
  */
-class Client extends AmazonClient
+class SaleClient extends AbstractClient
 {
     /**
-     * Client constructor
-     *
-     * @param array $amazonConfig
+     * @inheritdoc
      */
-    public function __construct(array $amazonConfig)
+    protected function process(array $data)
     {
-        parent::__construct($amazonConfig);
+        $response = $this->adapter->authorize($data, true);
+        return $response;
     }
 }

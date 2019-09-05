@@ -20,7 +20,7 @@ use Magento\Payment\Gateway\Response\HandlerInterface;
 use Amazon\Maxo\Gateway\Helper\SubjectReader;
 use Amazon\Maxo\Model\AsyncManagement;
 
-class SettlementHandler implements HandlerInterface
+class RefundHandler implements HandlerInterface
 {
     /**
      * @var SubjectReader
@@ -54,10 +54,11 @@ class SettlementHandler implements HandlerInterface
         $paymentDO = $this->subjectReader->readPayment($handlingSubject);
         $payment = $paymentDO->getPayment();
 
-        if (isset($response['chargeId'])) {
-            $payment->setTransactionId($response['chargeId'].'-capture');
-            $payment->setParentTransactionId($response['chargeId']);
-            $payment->setIsTransactionClosed(true);
+        if (isset($response['refundId'])) {
+            $payment->setTransactionId($response['refundId']);
+
+            // Verify refund via async
+            $this->asyncManagement->queuePendingRefund($payment->getOrder()->getId(), $response['refundId']);
         }
     }
 }

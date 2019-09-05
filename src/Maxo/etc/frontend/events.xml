@@ -19,4 +19,7 @@
     <event name="shortcut_buttons_container">
         <observer name="amazon_maxo_buttons" instance="Amazon\Maxo\Observer\AddAmazonButton"/>
     </event>
+    <event name="kco_override_load_checkout">
+        <observer name="amazon_maxo_klarna_kco_override" instance="Amazon\Maxo\Observer\KlarnaKcoOverride" />
+    </event>
 </config>

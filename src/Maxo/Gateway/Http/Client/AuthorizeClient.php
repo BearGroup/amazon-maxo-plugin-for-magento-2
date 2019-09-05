@@ -17,7 +17,7 @@
 namespace Amazon\Maxo\Gateway\Http\Client;
 
 /**
- * Class Client
+ * Class AuthorizeClient
  * Amazon Pay authorization gateway client
  */
 class AuthorizeClient extends AbstractClient

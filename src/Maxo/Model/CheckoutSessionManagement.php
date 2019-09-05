@@ -16,8 +16,6 @@
 
 namespace Amazon\Maxo\Model;
 
-use Magento\Quote\Api\CartRepositoryInterface;
-
 class CheckoutSessionManagement implements \Amazon\Maxo\Api\CheckoutSessionManagementInterface
 {
     /**
@@ -26,61 +24,29 @@ class CheckoutSessionManagement implements \Amazon\Maxo\Api\CheckoutSessionManag
     private $storeManager;
 
     /**
-     * @var \Amazon\Maxo\Model\AmazonConfig
+     * @var AmazonConfig
      */
     private $amazonConfig;
 
     /**
-     * @var \Amazon\Maxo\Model\Adapter\AmazonMaxoAdapter
+     * @var Adapter\AmazonMaxoAdapter
      */
     private $amazonAdapter;
-
-    /**
-     * @var \Magento\Quote\Model\QuoteIdMaskFactory
-     */
-    private $quoteIdMaskFactory;
-
-    /**
-     * @var CartRepositoryInterface
-     */
-    private $cartRepository;
-
-    /**
-     * @var \Magento\Quote\Api\Data\CartExtensionFactory
-     */
-    private $cartExtensionFactory;
-
-    /**
-     * @var \Magento\Quote\Api\CartRepositoryInterface
-     */
-    private $quoteRepository;
 
     /**
      * CheckoutSessionManagement constructor.
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param AmazonConfig $amazonConfig
      * @param Adapter\AmazonMaxoAdapter $amazonAdapter
-     * @param \Magento\Quote\Model\QuoteIdMaskFactory $quoteIdMaskFactory
-     * @param CartRepositoryInterface $cartRepository
-     * @param \Magento\Quote\Api\Data\CartExtensionFactory $cartExtensionFactory
-     * @param CartRepositoryInterface $quoteRepository
      */
     public function __construct(
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Amazon\Maxo\Model\AmazonConfig $amazonConfig,
-        \Amazon\Maxo\Model\Adapter\AmazonMaxoAdapter $amazonAdapter,
-        \Magento\Quote\Model\QuoteIdMaskFactory $quoteIdMaskFactory,
-        CartRepositoryInterface $cartRepository,
-        \Magento\Quote\Api\Data\CartExtensionFactory $cartExtensionFactory,
-        \Magento\Quote\Api\CartRepositoryInterface $quoteRepository
+        \Amazon\Maxo\Model\Adapter\AmazonMaxoAdapter $amazonAdapter
     ) {
         $this->storeManager = $storeManager;
         $this->amazonConfig = $amazonConfig;
         $this->amazonAdapter = $amazonAdapter;
-        $this->quoteIdMaskFactory = $quoteIdMaskFactory;
-        $this->cartRepository = $cartRepository;
-        $this->cartExtensionFactory = $cartExtensionFactory;
-        $this->quoteRepository = $quoteRepository;
     }
 
     /**
@@ -113,19 +79,17 @@ class CheckoutSessionManagement implements \Amazon\Maxo\Api\CheckoutSessionManag
     /**
      * Update Checkout Session to set payment info and transaction metadata
      *
+     * @see PaymentInformationManagement plugins
+     *
      * @param $quote
      * @param $amazonCheckoutSessionId
      */
-    public function updateCheckoutSession($cartId, $amazonCheckoutSessionId)
+    public function updateCheckoutSession($quote, $amazonCheckoutSessionId)
     {
-        // Load quote
-        $quoteIdMask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
-        /** @var \Magento\Quote\Api\Data\CartInterface $quote */
-        $quote = $this->cartRepository->getActive($quoteIdMask->getQuoteId());
-
         $response = $this->amazonAdapter->updateCheckoutSession($quote, $amazonCheckoutSessionId);
 
-        if ($response && isset($response['webCheckoutDetails'])) {
+        // Return final redirect URL to process payment on Amazon before redirecting to Magento success page
+        if (!empty($response['webCheckoutDetails']['amazonPayRedirectUrl'])) {
             return $response['webCheckoutDetails']['amazonPayRedirectUrl'];
         }
         return false;

@@ -31,6 +31,7 @@ class VoidHandler implements HandlerInterface
     private $subjectReader;
 
     /**
+     * VoidHandler constructor.
      * @param SubjectReader $subjectReader
      */
     public function __construct(SubjectReader $subjectReader)
@@ -45,9 +46,11 @@ class VoidHandler implements HandlerInterface
     {
         $paymentDO = $this->subjectReader->readPayment($handlingSubject);
 
-        /** @var Payment $orderPayment */
-        $orderPayment = $paymentDO->getPayment();
-        $orderPayment->setIsTransactionClosed(true);
-        $orderPayment->setShouldCloseParentTransaction(true);
+        if (isset($response['chargeId'])) {
+            /** @var Payment $orderPayment */
+            $orderPayment = $paymentDO->getPayment();
+            $orderPayment->setIsTransactionClosed(true);
+            $orderPayment->setShouldCloseParentTransaction(true);
+        }
     }
 }

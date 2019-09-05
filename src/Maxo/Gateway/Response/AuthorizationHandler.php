@@ -17,10 +17,11 @@
 namespace Amazon\Maxo\Gateway\Response;
 
 use Amazon\Maxo\Gateway\Helper\SubjectReader;
+use Amazon\Maxo\Model\AsyncManagement;
 use Magento\Payment\Gateway\Response\HandlerInterface;
 use Magento\Sales\Model\Order\Payment;
 
-class CompleteAuthHandler implements HandlerInterface
+class AuthorizationHandler implements HandlerInterface
 {
     /**
      * @var SubjectReader
@@ -28,13 +29,21 @@ class CompleteAuthHandler implements HandlerInterface
     private $subjectReader;
 
     /**
-     * TransactionIdHandler constructor.
+     * @var AsyncManagement
+     */
+    private $asyncManagement;
+
+    /**
+     * AuthorizationHandler constructor.
      * @param SubjectReader $subjectReader
+     * @param AsyncManagement $asyncManagement
      */
     public function __construct(
-        SubjectReader $subjectReader
+        SubjectReader $subjectReader,
+        AsyncManagement $asyncManagement
     ) {
         $this->subjectReader = $subjectReader;
+        $this->asyncManagement = $asyncManagement;
     }
 
     /**
@@ -51,26 +60,23 @@ class CompleteAuthHandler implements HandlerInterface
         if ($paymentDO->getPayment() instanceof Payment) {
             /** @var Payment $orderPayment */
             $orderPayment = $paymentDO->getPayment();
-            $order = $this->subjectReader->getOrder();
 
             // Successful Authorization
             if (!empty($response['chargeId'])) {
                 $orderPayment->setTransactionId($response['chargeId']);
             } else { // Pending Authorization
+                $order = $this->subjectReader->getCheckoutOrder();
+
                 $orderPayment->setIsTransactionPending(true);
                 $orderPayment->setTransactionId($response['chargePermissionId']);
                 $order->setState(\Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW)->setStatus(
                     \Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW
                 );
-                /* @todo
-                $this->pendingAuthorizationFactory->create()
-                    ->setAuthorizationId($response['chargePermissionId'])
-                    ->save();
-                 */
+
+                $this->asyncManagement->queuePendingAuthorization($response['chargePermissionId']);
             }
 
             $orderPayment->setIsTransactionClosed(false);
-
         }
     }
 }

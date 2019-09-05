@@ -17,7 +17,7 @@
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="checkout" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
-        <css src="Amazon_Maxo::css/styles.css"/>
+        <css src="Amazon_Maxo::css/checkout.css"/>
     </head>
     <body>
         <referenceBlock name="minicart">
@@ -49,15 +49,14 @@
                                             <item name="children" xsi:type="array">
                                                 <item name="shippingAddress" xsi:type="array">
                                                     <item name="children" xsi:type="array">
-                                                        <!--
                                                         <item name="customer-email" xsi:type="array">
                                                             <item name="children" xsi:type="array">
-                                                                <item name="amazon-button-region" xsi:type="array">
+                                                                <item name="amazon-maxo-button-region" xsi:type="array">
                                                                     <item name="component" xsi:type="string">uiComponent</item>
                                                                     <item name="displayArea" xsi:type="string">amazon-button-region</item>
                                                                     <item name="children" xsi:type="array">
                                                                         <item name="amazon-button" xsi:type="array">
-                                                                            <item name="component" xsi:type="string">Amazon_Payment/js/view/checkout-button</item>
+                                                                            <item name="component" xsi:type="string">Amazon_Maxo/js/view/checkout-button</item>
                                                                             <item name="sortOrder" xsi:type="string">0</item>
                                                                             <item name="displayArea" xsi:type="string">amazon-pay-button</item>
                                                                             <item name="config" xsi:type="array">
@@ -68,14 +67,12 @@
                                                                                     <item name="component" xsi:type="string">uiComponent</item>
                                                                                     <item name="displayArea" xsi:type="string">before-amazon-button</item>
                                                                                     <item name="children" xsi:type="array">
-
                                                                                     </item>
                                                                                 </item>
                                                                                 <item name="after-amazon-button" xsi:type="array">
                                                                                     <item name="component" xsi:type="string">uiComponent</item>
                                                                                     <item name="displayArea" xsi:type="string">after-amazon-button</item>
                                                                                     <item name="children" xsi:type="array">
-
                                                                                     </item>
                                                                                 </item>
                                                                             </item>
@@ -84,8 +81,6 @@
                                                                 </item>
                                                             </item>
                                                         </item>
-                                                        -->
-
                                                         <item name="before-form" xsi:type="array">
                                                             <item name="children" xsi:type="array">
                                                                 <item name="amazon-maxo-address" xsi:type="array">
@@ -99,9 +94,7 @@
                                                                             <item name="children" xsi:type="array">
                                                                                 <!-- before amazon address widget -->
                                                                                 <item name="amazon-checkout-revert" xsi:type="array">
-                                                                                    <!--
-                                                                                    <item name="component" xsi:type="string">Amazon_Payment/js/view/checkout-revert</item>
-                                                                                    -->
+                                                                                    <item name="component" xsi:type="string">Amazon_Maxo/js/view/checkout-revert</item>
                                                                                 </item>
                                                                             </item>
                                                                         </item>

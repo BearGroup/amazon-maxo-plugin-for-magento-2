@@ -31,16 +31,32 @@ class SaveGuestPaymentInformation
     private $amazonCheckoutSession;
 
     /**
+     * @var \Magento\Quote\Model\QuoteIdMaskFactory
+     */
+    private $quoteIdMaskFactory;
+
+    /**
+     * @var \Magento\Quote\Api\CartRepositoryInterface
+     */
+    private $cartRepository;
+
+    /**
      * SaveGuestPaymentInformation constructor.
      * @param \Amazon\Maxo\Model\CheckoutSessionManagement $checkoutSessionManagement
      * @param \Amazon\Maxo\CustomerData\CheckoutSession $amazonCheckoutSession
+     * @param \Magento\Quote\Model\QuoteIdMaskFactory $quoteIdMaskFactory
+     * @param \Magento\Quote\Api\CartRepositoryInterface $cartRepository
      */
     public function __construct(
         \Amazon\Maxo\Model\CheckoutSessionManagement $checkoutSessionManagement,
-        \Amazon\Maxo\CustomerData\CheckoutSession $amazonCheckoutSession
+        \Amazon\Maxo\CustomerData\CheckoutSession $amazonCheckoutSession,
+        \Magento\Quote\Model\QuoteIdMaskFactory $quoteIdMaskFactory,
+        \Magento\Quote\Api\CartRepositoryInterface $cartRepository
     ) {
         $this->checkoutSessionManagement = $checkoutSessionManagement;
         $this->amazonCheckoutSession = $amazonCheckoutSession;
+        $this->quoteIdMaskFactory = $quoteIdMaskFactory;
+        $this->cartRepository = $cartRepository;
     }
 
     /**
@@ -61,9 +77,12 @@ class SaveGuestPaymentInformation
         \Magento\Quote\Api\Data\AddressInterface $billingAddress
     ) {
         if ($paymentMethod->getMethod() == GatewayConfig::CODE) {
+            $quoteIdMask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
+            /** @var Quote $quote */
+            $quote = $this->cartRepository->getActive($quoteIdMask->getQuoteId());
 
             return $this->checkoutSessionManagement->updateCheckoutSession(
-                $cartId,
+                $quote,
                 $this->amazonCheckoutSession->getCheckoutSessionId()
             );
 

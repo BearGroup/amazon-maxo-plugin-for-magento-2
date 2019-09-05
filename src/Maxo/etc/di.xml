@@ -21,6 +21,7 @@
 
     <preference for="Amazon\Maxo\Api\CheckoutSessionManagementInterface" type="Amazon\Maxo\Model\CheckoutSessionManagement" />
     <preference for="Amazon\Maxo\Api\AddressManagementInterface" type="Amazon\Maxo\Model\AddressManagement" />
+    <preference for="Amazon\Maxo\Api\Data\AsyncInterface" type="Amazon\Maxo\Model\Async" />
 
     <type name="Amazon\Maxo\Logger\Logger">
         <arguments>
@@ -40,10 +41,10 @@
     </type>
 
     <type name="Magento\Checkout\Model\PaymentInformationManagement">
-        <plugin name="amazon_maxo_save_payment_info" type="Amazon\Maxo\Plugin\SavePaymentInformation" sortOrder="10" disabled="false"/>
+        <plugin name="amazon_maxo_save_payment_info" type="Amazon\Maxo\Plugin\SavePaymentInformation" sortOrder="100" disabled="false"/>
     </type>
     <type name="Magento\Checkout\Model\GuestPaymentInformationManagement">
-        <plugin name="amazon_maxo_save_payment_info" type="Amazon\Maxo\Plugin\SaveGuestPaymentInformation" sortOrder="10" disabled="false"/>
+        <plugin name="amazon_maxo_save_payment_info" type="Amazon\Maxo\Plugin\SaveGuestPaymentInformation" sortOrder="100" disabled="false"/>
     </type>
 
     <!-- Payment Method Facade configuration -->
@@ -102,9 +103,9 @@
     <virtualType name="AmazonMaxoAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
         <arguments>
             <argument name="requestBuilder" xsi:type="object">Amazon\Maxo\Gateway\Request\AuthorizationRequestBuilder</argument>
-            <argument name="transferFactory" xsi:type="object">Amazon\Maxo\Gateway\Http\TransferFactory</argument>
             <argument name="client" xsi:type="object">Amazon\Maxo\Gateway\Http\Client\AuthorizeClient</argument>
-            <argument name="handler" xsi:type="object">Amazon\Maxo\Gateway\Response\CompleteAuthHandler</argument>
+            <argument name="handler" xsi:type="object">Amazon\Maxo\Gateway\Response\AuthorizationHandler</argument>
+            <argument name="transferFactory" xsi:type="object">Amazon\Maxo\Gateway\Http\TransferFactory</argument>
             <argument name="validator" xsi:type="object">Amazon\Maxo\Gateway\Validator\GeneralResponseValidator</argument>
             <argument name="errorMessageMapper" xsi:type="object">Amazon\Maxo\Gateway\ErrorMapper\VirtualErrorMessageMapper</argument>
         </arguments>
@@ -114,9 +115,9 @@
     <virtualType name="AmazonMaxoSaleCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
         <arguments>
             <argument name="requestBuilder" xsi:type="object">Amazon\Maxo\Gateway\Request\AuthorizationRequestBuilder</argument>
+            <argument name="client" xsi:type="object">Amazon\Maxo\Gateway\Http\Client\SaleClient</argument>
+            <argument name="handler" xsi:type="object">Amazon\Maxo\Gateway\Response\SaleHandler</argument>
             <argument name="transferFactory" xsi:type="object">Amazon\Maxo\Gateway\Http\TransferFactory</argument>
-            <argument name="client" xsi:type="object">Amazon\Maxo\Gateway\Http\Client\AuthorizeClient</argument>
-            <argument name="handler" xsi:type="object">Amazon\Maxo\Gateway\Response\CompleteAuthHandler</argument>
             <argument name="validator" xsi:type="object">Amazon\Maxo\Gateway\Validator\GeneralResponseValidator</argument>
             <argument name="errorMessageMapper" xsi:type="object">Amazon\Maxo\Gateway\ErrorMapper\VirtualErrorMessageMapper</argument>
         </arguments>
@@ -126,9 +127,9 @@
     <virtualType name="AmazonMaxoSettlementCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
         <arguments>
             <argument name="requestBuilder" xsi:type="object">Amazon\Maxo\Gateway\Request\SettlementRequestBuilder</argument>
+            <argument name="client" xsi:type="object">Amazon\Maxo\Gateway\Http\Client\SettlementClient</argument>
             <argument name="handler" xsi:type="object">Amazon\Maxo\Gateway\Response\SettlementHandler</argument>
             <argument name="transferFactory" xsi:type="object">Amazon\Maxo\Gateway\Http\TransferFactory</argument>
-            <argument name="client" xsi:type="object">Amazon\Maxo\Gateway\Http\Client\SettlementClient</argument>
             <argument name="validator" xsi:type="object">Amazon\Maxo\Gateway\Validator\GeneralResponseValidator</argument>
             <argument name="errorMessageMapper" xsi:type="object">Amazon\Maxo\Gateway\ErrorMapper\VirtualErrorMessageMapper</argument>
         </arguments>
@@ -143,7 +144,7 @@
     <!-- Refund Command -->
     <virtualType name="AmazonMaxoRefundCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
         <arguments>
-            <argument name="requestBuilder" xsi:type="object">Amazon\Maxo\Gateway\Request\RefundRequestBuilder</argument>
+            <argument name="requestBuilder" xsi:type="object">Amazon\Maxo\Gateway\Request\SettlementRequestBuilder</argument>
             <argument name="handler" xsi:type="object">Amazon\Maxo\Gateway\Response\RefundHandler</argument>
             <argument name="transferFactory" xsi:type="object">Amazon\Maxo\Gateway\Http\TransferFactory</argument>
             <argument name="client" xsi:type="object">Amazon\Maxo\Gateway\Http\Client\RefundClient</argument>
@@ -157,8 +158,8 @@
         <arguments>
             <argument name="requestBuilder" xsi:type="object">Amazon\Maxo\Gateway\Request\VoidRequestBuilder</argument>
             <argument name="handler" xsi:type="object">Amazon\Maxo\Gateway\Response\VoidHandler</argument>
-            <argument name="transferFactory" xsi:type="object">Amazon\Maxo\Gateway\Http\TransferFactory</argument>
             <argument name="client" xsi:type="object">Amazon\Maxo\Gateway\Http\Client\VoidClient</argument>
+            <argument name="transferFactory" xsi:type="object">Amazon\Maxo\Gateway\Http\TransferFactory</argument>
             <argument name="validator" xsi:type="object">Amazon\Maxo\Gateway\Validator\GeneralResponseValidator</argument>
             <argument name="errorMessageMapper" xsi:type="object">Amazon\Maxo\Gateway\ErrorMapper\VirtualErrorMessageMapper</argument>
         </arguments>

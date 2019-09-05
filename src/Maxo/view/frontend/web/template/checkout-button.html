@@ -1,4 +1,4 @@
-<?php
+<!--
 /**
  * Copyright © Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
@@ -13,46 +13,31 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+-->
 
-/**
- * @var \Amazon\Maxo\Block\Minicart\Button $block
- */
-$config = [
-    'Amazon_Maxo/js/amazon-button' => [
-        'buttonType' => 'PwA'
-    ]
-];
+<!-- ko foreach: getRegion('before-amazon-button') -->
+    <!-- ko template: getTemplate() --><!-- /ko -->
+<!--/ko-->
 
-$tooltipConfig = [
-    'dropdown' => [
-        'activeClass' => '_active'
-    ]
-];
-
-?>
-
-<div id="minicart-amazon-pay-button" class="amazon-button-container-v2">
+<div class="amazon-button-container-v2" data-bind="visible: isVisible">
     <div class="amazon-button-column">
         <div id="PayWithAmazon-"
              class="amazon-checkout-button"
-             data-mage-init='<?= /* @noEscape */ json_encode($config); ?>'>
-        </div>
+             data-bind="attr: {id: 'PayWithAmazon_' + displayArea}, mageInit: {'Amazon_Maxo/js/amazon-button':{'buttonType': 'PwA'}}"></div>
     </div>
-    <div class="amazon-button-column amazon-button-column-tooltip">
 
+    <div class="amazon-button-column amazon-button-column-tooltip">
         <div class="field-tooltip toggle">
             <span class="field-tooltip-action action-help"
-                  data-mage-init='<?= /* @noEscape */ json_encode($tooltipConfig); ?>'
+                  data-bind="mageInit: {'dropdown':{'activeClass': '_active'}}"
                   data-toggle="dropdown"
                   aria-haspopup="true"
-                  aria-expanded="false">
-            </span>
-            <div class="field-tooltip-content" data-target="dropdown" aria-hidden="true">
-                <?= $block->escapeHtml(__('Are you an Amazon customer? ' .
-                    'Pay now with address and payment details stored in your Amazon account.')); ?>
-            </div>
+                  aria-expanded="false"></span>
+            <div class="field-tooltip-content" data-target="dropdown" aria-hidden="true" data-bind="text: tooltip"></div>
         </div>
-
     </div>
-
 </div>
+
+<!-- ko foreach: getRegion('after-amazon-button') -->
+    <!-- ko template: getTemplate() --><!-- /ko -->
+<!--/ko-->

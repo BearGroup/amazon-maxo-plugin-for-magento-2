@@ -98,11 +98,6 @@ define(
                 // Only display one address from Amazon
                 addressList.removeAll();
 
-                if (!amazonStorage.getCheckoutSessionId()) {
-                    //this.resetCheckout();
-                    //return;
-                }
-
                 amazonStorage.isShippingMethodsLoading(true);
                 shippingService.isLoading(true);
                 serviceUrl = urlBuilder.createUrl('/amazon-v2-shipping-address/:amazonCheckoutSessionId', {
