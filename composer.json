@@ -1,6 +1,6 @@
 {
-  "name": "amzn/amazon-pay-maxo-magento-2-module",
-  "description": "Official Magento2 Plugin to integrate with Amazon Pay and Login with Amazon",
+  "name": "amzn/amazon-pay-v2-magento-2-module",
+  "description": "Official Magento2 Plugin to integrate with Amazon Pay V2",
   "type": "magento2-module",
   "version": "3.2.13",
   "license": [
@@ -36,10 +36,10 @@
   },
   "autoload": {
     "files": [
-      "src/Maxo/registration.php"
+      "src/PayV2/registration.php"
     ],
     "psr-4": {
-      "Amazon\\Maxo\\": "src/Maxo"
+      "Amazon\\PayV2\\": "src/PayV2"
     }
   }
 }
