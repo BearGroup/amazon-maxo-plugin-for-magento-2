@@ -290,7 +290,7 @@ class AmazonConfig
     public function getPrivateKey($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
     {
         return $this->scopeConfig->getValue(
-            'payment/amazon_payment/private_key',
+            'payment/amazon_payment_v2/private_key',
             $scope,
             $scopeCode
         );
@@ -308,7 +308,7 @@ class AmazonConfig
     public function getPublicKey($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
     {
         return $this->scopeConfig->getValue(
-            'payment/amazon_payment/public_key',
+            'payment/amazon_payment_v2/public_key',
             $scope,
             $scopeCode
         );
@@ -326,7 +326,7 @@ class AmazonConfig
     public function getPublicKeyId($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
     {
         return $this->scopeConfig->getValue(
-            'payment/amazon_payment/public_key_id',
+            'payment/amazon_payment_v2/public_key_id',
             $scope,
             $scopeCode
         );
@@ -338,7 +338,7 @@ class AmazonConfig
     public function getMerchantId($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
     {
         return $this->scopeConfig->getValue(
-            'payment/amazon_payment/merchant_id',
+            'payment/amazon_payment_v2/merchant_id',
             $scope,
             $scopeCode
         );
@@ -350,7 +350,7 @@ class AmazonConfig
     public function getClientId($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
     {
         return $this->scopeConfig->getValue(
-            'payment/amazon_payment/client_id',
+            'payment/amazon_payment_v2/store_id',
             $scope,
             $scopeCode
         );
@@ -362,7 +362,7 @@ class AmazonConfig
     public function getPaymentAction($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
     {
         return $this->scopeConfig->getValue(
-            'payment/amazon_payment/payment_action',
+            'payment/amazon_payment_v2/payment_action',
             $scope,
             $scopeCode
         );
@@ -411,4 +411,27 @@ class AmazonConfig
     {
         return $this->scopeConfig->isSetFlag('payment/amazon_payment/minicart_button_is_visible', $scope, $scopeCode);
     }
+
+   /**
+     * @param string $scope
+     * @param null|string $scopeCode
+     *
+     * @return bool
+     */
+    public function isPayButtonAvailableOnProductPage($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
+    {
+        return $this->scopeConfig->isSetFlag('payment/amazon_payment/pwa_pp_button_is_visible', $scope, $scopeCode);
+    }
+
+    /**
+     * @param string $scope
+     * @param null|string $scopeCode
+     *
+     * @return bool
+     */
+    public function isPayButtonAvailableAsPaymentMethod($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
+    {
+        return $this->scopeConfig->isSetFlag('payment/amazonlogin/active', $scope, $scopeCode);
+    }
+
 }

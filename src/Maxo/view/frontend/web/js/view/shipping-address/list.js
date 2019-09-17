@@ -6,17 +6,17 @@ define([
 ], function (Component, addressList, amazonStorage, ko) {
     'use strict';
 
+    if (!amazonStorage.isAmazonCheckout()) {
+        return Component;
+    }
+
     return Component.extend({
         /**
          * Init address list
          */
         initObservable: function () {
             this._super();
-
-            if (amazonStorage.isAmazonCheckout()) {
-                this.visible = true;
-            }
-
+            this.visible = true;
             return this;
         }
     });

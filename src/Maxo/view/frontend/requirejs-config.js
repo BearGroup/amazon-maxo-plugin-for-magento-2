@@ -15,6 +15,7 @@
 var config = {
     map: {
         '*': {
+            amazonMaxoProductAdd: 'Amazon_Maxo/js/amazon-product-add',
             amazonMaxoButton: 'Amazon_Maxo/js/amazon-button',
             amazonMaxoConfig: 'Amazon_Maxo/js/model/amazonMaxoConfig'
         }

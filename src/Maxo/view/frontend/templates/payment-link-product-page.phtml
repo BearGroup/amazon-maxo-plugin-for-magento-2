@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2016 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -13,27 +13,33 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-
+?>
+<?php
 /**
- * @var \Amazon\Maxo\Block\Minicart\Button $block
+ * @var \Amazon\Maxo\Block\Minicart\ProductPagePaymentLink $block
  */
 ?>
 
-<div id="minicart-amazon-pay-button" class="amazon-button-container-v2">
+<div class="amazon-button-container-v2 amazon-button-product-page">
     <div class="amazon-button-column">
         <div id="PayWithAmazon-"
              class="amazon-checkout-button"
-             data-mage-init='{"Amazon_Maxo/js/amazon-button": {}}'>
+             data-mage-init='{"Amazon_Maxo/js/amazon-button": {"placement": "Product"}}'>
         </div>
+        <a href="javascript:;"
+           class="amazon-addtoCart"
+           id="amazon-addtoCart-<?= /* @noEscape */ $block->getJsId() ?>"
+           data-mage-init='{"amazonMaxoProductAdd": {}}'>
+        </a>
     </div>
     <div class="amazon-button-column amazon-button-column-tooltip">
         <div class="field-tooltip toggle">
-            <span class="field-tooltip-action action-help"
-                  data-bind="mageInit: {'dropdown':{'activeClass': '_active'}}"
-                  data-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false">
-            </span>
+    <span class="field-tooltip-action action-help"
+          data-bind="mageInit: {'dropdown':{'activeClass': '_active'}}"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false">
+    </span>
             <div class="field-tooltip-content" data-target="dropdown" aria-hidden="true">
                 <?= $block->escapeHtml(__('Are you an Amazon customer? ' .
                     'Pay now with address and payment details stored in your Amazon account.')); ?>

@@ -66,11 +66,19 @@ class CheckoutProcessor
             ['inline-form-manipulator']['component'] = 'Amazon_Maxo/js/view/shipping-address/inline-form';
 
             $paymentConfig['children']['payments-list']['component'] = 'Amazon_Maxo/js/view/payment/list';
+
+            unset($paymentConfig['children']['renders']['children']['amazonlogin']); // legacy
+
+            // "Show Amazon Pay in payment methods"?
+            if (!$this->amazonConfig->isPayButtonAvailableAsPaymentMethod()) {
+                unset($paymentConfig['children']['renders']['children']['amazon_payment_v2-button']);
+            }
+
         } else {
             unset($shippingConfig['children']['customer-email']['children']['amazon-maxo-button-region']);
             unset($shippingConfig['children']['before-form']['children']['amazon-maxo-address']);
-            unset($paymentConfig['children']['renders']['children']['amazon_payment']);
-            unset($paymentConfig['children']['payments-list']['children']['amazon_payment-form']);
+            unset($paymentConfig['children']['renders']['children']['amazon_payment_v2-method']);
+            unset($paymentConfig['children']['renders']['children']['amazon_payment_v2-button']);
         }
 
         return $jsLayout;

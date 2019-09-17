@@ -13,12 +13,11 @@ define(
 
         return Component.extend({
             defaults: {
-                template: 'Amazon_Maxo/payment/amazon-payment-method'
+                template: 'Amazon_Maxo/payment/amazon-payment-button'
             },
 
             initObservable: function () {
                 this._super();
-                this.selectPaymentMethod();
                 return this;
             },
 
@@ -26,17 +25,6 @@ define(
              * Save order
              */
             placeOrder: function (data, event) {
-                var placeOrder;
-
-                if (event) {
-                    event.preventDefault();
-                }
-
-                if (this.validate()) {
-                    //this.isPlaceOrderActionAllowed(false);
-                    placeOrder = placeOrderAction(this.getData());
-                }
-
                 return false;
             }
 

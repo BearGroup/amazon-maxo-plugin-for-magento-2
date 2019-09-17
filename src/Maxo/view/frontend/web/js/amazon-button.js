@@ -17,12 +17,18 @@ define([
     'Magento_Customer/js/customer-data',
     'Amazon_Maxo/js/model/amazon-maxo-config',
     'Amazon_Maxo/js/model/storage',
-    'amazonMaxoCheckout'
-], function ($, customerData, amazonMaxoConfig, amazonStorage) {
+    'mage/url',
+    'amazonMaxoCheckout',
+], function ($, customerData, amazonMaxoConfig, amazonStorage, url) {
     'use strict';
 
     if (amazonStorage.isEnabled) {
         $.widget('amazon.AmazonButton', {
+            options: {
+                placement: amazonMaxoConfig.getValue('placement'),
+                selector: '.amazon-checkout-button'
+            },
+
             /**
              * Create button
              */
@@ -31,17 +37,18 @@ define([
                     amazonStorage.reloadCheckoutSessionId();
                 }
 
-                amazon.Pay.renderButton('.amazon-checkout-button', {
+                amazon.Pay.renderButton(this.options.selector, {
                     merchantId: amazonMaxoConfig.getValue('merchantId'),
-                    createCheckoutSession: function() {
-                        return new Promise(function(resolve, reject) {
-                            resolve(amazonStorage.getCheckoutSessionId());
-                        });
+                    createCheckoutSession: {
+                        url: url.build('amazon_maxo/checkout/createSession'),
+                        method: 'PUT',
+                        extractAmazonCheckoutSessionId: function(response) {
+                            return amazonStorage.getCheckoutSessionId();
+                        }
                     },
                     ledgerCurrency: amazonMaxoConfig.getValue('currency'),
                     checkoutLanguage: amazonMaxoConfig.getValue('language'),
-                    productType: 'PayAndShip',
-                    placement: amazonMaxoConfig.getValue('placement'),
+                    placement: this.options.placement,
                     sandbox: amazonMaxoConfig.getValue('sandbox'),
                 });
                 $('.amazon-button-container-v2 .field-tooltip').fadeIn();
