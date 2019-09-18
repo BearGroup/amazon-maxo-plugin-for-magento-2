@@ -155,6 +155,11 @@
                             <field id="payment/us/amazon_payment/api_version">1</field>
                         </depends>
                     </field>
+                    <field id="update_mechanism" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <depends>
+                            <field id="payment/us/amazon_payment/api_version">1</field>
+                        </depends>
+                    </field>
                 </group>
                 <group id="advanced" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Advanced</label>
