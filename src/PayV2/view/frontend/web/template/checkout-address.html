@@ -15,16 +15,6 @@
  */
 -->
 
-<!-- ko foreach: getRegion('before-address') -->
-    <!-- ko template: getTemplate() --><!-- /ko -->
-<!--/ko-->
-
 <!-- ko if: (isAmazonCheckout) -->
-    <div class="amazon-container" data-bind="afterRender: initAddress">
-
-    </div>
-<!--/ko-->
-
-<!-- ko foreach: getRegion('after-address') -->
-    <!-- ko template: getTemplate() --><!-- /ko -->
+    <div class="amazon-container" data-bind="afterRender: initAddress"></div>
 <!--/ko-->

@@ -6,9 +6,11 @@ define(
         'ko',
         'Magento_Checkout/js/view/shipping',
         'Magento_Customer/js/model/customer',
+        'Magento_Checkout/js/model/quote',
         'Magento_Checkout/js/action/set-shipping-information',
         'Magento_Checkout/js/model/step-navigator',
-        'Amazon_PayV2/js/model/storage'
+        'Amazon_PayV2/js/model/storage',
+        'Amazon_PayV2/js/action/toggle-shipping-form'
     ],
     function (
         $,
@@ -16,9 +18,11 @@ define(
         ko,
         Component,
         customer,
+        quote,
         setShippingInformationAction,
         stepNavigator,
-        amazonStorage
+        amazonStorage,
+        toggleShippingForm
     ) {
         'use strict';
 
@@ -47,31 +51,11 @@ define(
             },
 
             /**
-             * New setShipping Action for Amazon Pay to bypass validation
+             * "Next"
              */
             setShippingInformation: function () {
-
-                /**
-                 * Set Amazon shipping info
-                 */
-                function setShippingInformationAmazon() {
-                    setShippingInformationAction().done(
-                        function () {
-                            stepNavigator.next();
-                        }
-                    );
-                }
-
-                if (amazonStorage.isAmazonCheckout() && customer.isLoggedIn()) {
-                    setShippingInformationAmazon();
-                } else if (amazonStorage.isAmazonCheckout() && !customer.isLoggedIn()) {
-                    if (this.validateGuestEmail()) {
-                        setShippingInformationAmazon();
-                    }
-                    //if using guest checkout or guest checkout with amazon pay we need to use the main validation
-                } else if (this.validateShippingInformation()) {
-                    setShippingInformationAmazon();
-                }
+                toggleShippingForm.toggleFields(); // Display error fields if needed
+                this._super();
             }
         });
     }

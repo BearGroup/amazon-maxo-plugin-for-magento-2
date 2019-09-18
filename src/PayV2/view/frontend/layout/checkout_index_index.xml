@@ -67,6 +67,9 @@
                                                                                     <item name="component" xsi:type="string">uiComponent</item>
                                                                                     <item name="displayArea" xsi:type="string">before-amazon-button</item>
                                                                                     <item name="children" xsi:type="array">
+                                                                                        <item name="amazon-checkout-revert" xsi:type="array">
+                                                                                            <item name="component" xsi:type="string">Amazon_PayV2/js/view/checkout-revert</item>
+                                                                                        </item>
                                                                                     </item>
                                                                                 </item>
                                                                                 <item name="after-amazon-button" xsi:type="array">
@@ -81,31 +84,13 @@
                                                                 </item>
                                                             </item>
                                                         </item>
+
                                                         <item name="before-form" xsi:type="array">
                                                             <item name="children" xsi:type="array">
                                                                 <item name="amazon-payv2-address" xsi:type="array">
                                                                     <item name="component" xsi:type="string">Amazon_PayV2/js/view/checkout-address</item>
                                                                     <item name="sortOrder" xsi:type="string">0</item>
                                                                     <item name="displayArea" xsi:type="string">amazon-payv2-address</item>
-                                                                    <item name="children" xsi:type="array">
-                                                                        <item name="before-address" xsi:type="array">
-                                                                            <item name="component" xsi:type="string">uiComponent</item>
-                                                                            <item name="displayArea" xsi:type="string">before-address</item>
-                                                                            <item name="children" xsi:type="array">
-                                                                                <!-- before amazon address widget -->
-                                                                                <item name="amazon-checkout-revert" xsi:type="array">
-                                                                                    <item name="component" xsi:type="string">Amazon_PayV2/js/view/checkout-revert</item>
-                                                                                </item>
-                                                                            </item>
-                                                                        </item>
-                                                                        <item name="after-address" xsi:type="array">
-                                                                            <item name="component" xsi:type="string">uiComponent</item>
-                                                                            <item name="displayArea" xsi:type="string">after-address</item>
-                                                                            <item name="children" xsi:type="array">
-                                                                                <!-- after amazon address widget -->
-                                                                            </item>
-                                                                        </item>
-                                                                    </item>
                                                                 </item>
                                                             </item>
                                                         </item>

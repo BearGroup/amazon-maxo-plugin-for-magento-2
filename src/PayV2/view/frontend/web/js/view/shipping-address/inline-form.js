@@ -1,14 +1,13 @@
 define([
     'uiComponent',
-    'ko',
-    'Amazon_PayV2/js/model/storage'
-], function (Component, ko, amazonStorage) {
+    'Magento_Checkout/js/model/shipping-service',
+    'Amazon_PayV2/js/action/toggle-shipping-form'
+], function (Component, shippingService, toggleShippingForm) {
     'use strict';
 
     return Component.extend({
         defaults: {
-            template: 'Amazon_PayV2/shipping-address/inline-form',
-            formSelector: 'co-shipping-form'
+            template: 'Amazon_PayV2/shipping-address/inline-form'
         },
 
         /**
@@ -16,6 +15,11 @@ define([
          */
         initObservable: function () {
             this._super();
+            shippingService.isLoading.subscribe(function(isLoading) {
+                if (!isLoading) {
+                    toggleShippingForm.toggleFields();
+                }
+            });
             return this;
         },
 
@@ -23,18 +27,7 @@ define([
          * Show/hide inline form depending on Amazon checkout status
          */
         manipulateInlineForm: function () {
-            this.hideInlineForm(amazonStorage.isAmazonCheckout());
-        },
-
-        /**
-         * Show/hide inline form
-         */
-        hideInlineForm: function(hide) {
-            var elem = document.getElementById(this.formSelector);
-
-            if (elem) {
-                document.getElementById(this.formSelector).style.display = hide ? 'none' : 'block';
-            }
+            toggleShippingForm.toggleFields();
         }
     });
 });

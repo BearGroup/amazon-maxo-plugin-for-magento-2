@@ -62,8 +62,10 @@ class CheckoutProcessor
             $shippingConfig['children']['address-list']['rendererTemplates']['new-customer-address']
             ['component'] = 'Amazon_PayV2/js/view/shipping-address/address-renderer/default';
 
-            $shippingConfig['children']['shipping-address-fieldset']['children']
-            ['inline-form-manipulator']['component'] = 'Amazon_PayV2/js/view/shipping-address/inline-form';
+            $shippingConfig['children']['shipping-address-fieldset']['children']['inline-form-manipulator'] = [
+                'component' => 'Amazon_PayV2/js/view/shipping-address/inline-form',
+                'sortOrder' => 1000,
+            ];
 
             $paymentConfig['children']['payments-list']['component'] = 'Amazon_PayV2/js/view/payment/list';
 

@@ -55,7 +55,6 @@ define(
             },
             isCustomerLoggedIn: customer.isLoggedIn,
             isAmazonCheckout: amazonStorage.isAmazonCheckout(),
-            //isAmazonEnabled: ko.observable(registry.get('amazonPayment').isPwaEnabled),
             rates: shippingService.getShippingRates(),
 
             /**
@@ -84,13 +83,13 @@ define(
                         return el != null;
                     });
                 }
-                addressDataList.telephone = '';
+
                 addressList.push(addressDataList);
                 this.setEmail(addressDataList.email);
             },
 
             /**
-             * Get shipping address from Amazon API
+             * Retrieve shipping address from Amazon API
              */
             getShippingAddressFromAmazon: function () {
                 var serviceUrl, payload;
@@ -117,15 +116,14 @@ define(
 
                         var amazonAddress = data.shift(),
                             addressData = addressConverter.formAddressDataToQuoteAddress(amazonAddress),
+                            checkoutProvider = registry.get('checkoutProvider'),
+                            addressConvert,
                             i;
 
-                        console.log(amazonAddress);
-                        console.log(addressData);
+                        //console.log(amazonAddress);
+                        //console.log(addressData);
 
                         self.setEmail(amazonAddress.email);
-
-                        // If telephone is blank set it to 00000000 so it passes the required validation
-                        addressData.telephone = !addressData.telephone ? '0000000000' : addressData.telephone;
 
                         // Fill in blank street fields
                         if ($.isArray(addressData.street)) {
@@ -133,13 +131,23 @@ define(
                                 addressData.street[i] = '';
                             }
                         }
-                        checkoutData.setShippingAddressFromData(
-                            addressConverter.quoteAddressToFormAddressData(addressData)
-                        );
+
+                        // Amazon does not return telephone or non-US regionIds, so use previous provider values
+                        if (checkoutProvider.shippingAddress) {
+                            addressData.telephone = checkoutProvider.shippingAddress.telephone;
+                            if (!addressData.regionId) {
+                                addressData.regionId = checkoutProvider.shippingAddress.region_id;
+                            }
+                        }
+
+                        // Save shipping address
+                        addressConvert = addressConverter.quoteAddressToFormAddressData(addressData);
+                        checkoutData.setShippingAddressFromData(addressConvert);
+                        checkoutProvider.set('shippingAddress', addressConvert);
+
                         checkoutDataResolver.resolveEstimationAddress();
 
                         self.initAddress();
-
                     }
                 ).fail(
                     function (response) {
@@ -150,12 +158,21 @@ define(
                     }
                 );
             },
+
+            /**
+             * Set email address
+             * @param email
+             */
             setEmail: function(email) {
                 $('#customer-email').val(email);
                 checkoutData.setInputFieldEmailValue(email);
                 checkoutData.setValidatedEmailValue(email);
                 quote.guestEmail = email;
             },
+
+            /**
+             * Revert to standard checkout
+             */
             resetCheckout: function() {
                 amazonStorage.clearAmazonCheckout();
                 window.location =  window.checkoutConfig.checkoutUrl;
