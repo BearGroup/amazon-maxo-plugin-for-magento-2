@@ -96,6 +96,9 @@ class CompleteCheckout extends \Magento\Framework\App\Action\Action
                 $this->exceptionLogger->logException($e);
                 $this->amazonCheckoutSession->clearCheckoutSessionId();
                 $this->messageManager->addErrorMessage($e->getMessage());
+                if (strpos($e->getMessage(),'different payment method') !== false) {
+                    return $this->_redirect('checkout');
+                }
             }
         } else {
             $this->messageManager->addErrorMessage('Invalid amazonCheckoutSessionId');
