@@ -18,6 +18,7 @@
 <mapping xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Payment:etc/error_mapping.xsd">
     <message_list>
         <!-- checkout -->
+        <message code="BuyerCanceled" translate="true">This transaction was cancelled. Please try again.</message>
         <message code="InvalidCheckoutSessionStatus" translate="true">Operation on Checkout Session is in a state where the operation is not allowed.</message>
         <!-- charge permission -->
         <message code="ChargePermissionNotModifiable" translate="true">Operation on Charge Permission is in a state where it can't be modified.</message>
@@ -31,6 +32,7 @@
         <message code="MFANotCompleted" translate="true">Multi-factor authentication (MFA) is required to be complete by the buyer for this transaction to process.</message>
         <message code="InvalidChargeStatus" translate="true">Operation on a Charge is in a state where the operation cannot be called.</message>
         <!-- generic errors -->
+        <message code="Declined" translate="true">This transaction was declined. Please try again using a different payment method.</message>
         <message code="TransactionCountExceeded" translate="true">Number of authorizations, captures or refunds has exceeded allowed limits.</message>
         <message code="TransactionAmountExceeded" translate="true">Number of authorizations, captures or refunds has exceeded allowed limits.</message>
         <message code="TransactionTimedOut" translate="true">Unfortunately it is not possible to use Amazon Pay for this order, please choose another payment method.</message>
