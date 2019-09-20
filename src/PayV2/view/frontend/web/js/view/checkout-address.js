@@ -48,6 +48,7 @@ define(
         var self;
 
         require(['amazonPayV2Checkout']);
+        amazonStorage.reloadCheckoutSessionId();
 
         return Component.extend({
             defaults: {

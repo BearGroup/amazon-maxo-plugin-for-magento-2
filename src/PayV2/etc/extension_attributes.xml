@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="urn:magento:framework:Api/etc/extension_attributes.xsd">
-    <extension_attributes for="Magento\Quote\Api\Data\CartInterface">
-        <attribute code="amazon_checkout_session_id" type="string"/>
-    </extension_attributes>
-</config>

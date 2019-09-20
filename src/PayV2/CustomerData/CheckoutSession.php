@@ -76,14 +76,14 @@ class CheckoutSession implements SectionSourceInterface
     /**
      * Get Amazon Checkout Session Id
      */
-    public function getCheckoutSessionId()
+    public function getCheckoutSessionId($reset = false)
     {
         if (!$this->amazonConfig->isEnabled()) {
             return false;
         }
 
         $sessionId = $this->session->getAmazonCheckoutSessionId();
-        if (!$sessionId) {
+        if (!$sessionId || $reset) {
             $sessionId = $this->createCheckoutSessionId();
         }
         return $sessionId;

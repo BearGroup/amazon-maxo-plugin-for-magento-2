@@ -33,18 +33,11 @@ define([
              * Create button
              */
             _create: function () {
-                if (!amazonStorage.getCheckoutSessionId()) {
-                    amazonStorage.reloadCheckoutSessionId();
-                }
-
                 amazon.Pay.renderButton(this.options.selector, {
                     merchantId: amazonPayV2Config.getValue('merchantId'),
                     createCheckoutSession: {
                         url: url.build('amazon_payv2/checkout/createSession'),
-                        method: 'PUT',
-                        extractAmazonCheckoutSessionId: function(response) {
-                            return amazonStorage.getCheckoutSessionId();
-                        }
+                        method: 'PUT'
                     },
                     ledgerCurrency: amazonPayV2Config.getValue('currency'),
                     checkoutLanguage: amazonPayV2Config.getValue('language'),

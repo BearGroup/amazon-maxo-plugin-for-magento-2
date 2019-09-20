@@ -17,12 +17,13 @@ define([
     'jquery',
     'ko',
     'Magento_Customer/js/customer-data',
-    'Amazon_PayV2/js/model/amazon-payv2-config',
+    'Amazon_PayV2/js/model/amazon-payv2-config'
 ], function ($, ko, customerData, amazonPayV2Config) {
     'use strict';
 
     var isEnabled = amazonPayV2Config.isDefined(),
         isShippingMethodsLoading = ko.observable(false),
+        queryCheckoutSessionId = window.location.search.replace('?amazonCheckoutSessionId=', ''),
         cacheKey = 'is-amazon-checkout',
         sectionKey = 'amazon-checkout-session';
 
@@ -65,7 +66,9 @@ define([
          */
         getCheckoutSessionId: function() {
             var checkoutSessionData = customerData.get(sectionKey);
-            if (checkoutSessionData) {
+            if (queryCheckoutSessionId) {
+                return queryCheckoutSessionId;
+            } else if (checkoutSessionData) {
                 return checkoutSessionData()['checkoutSessionId'];
             }
         },
