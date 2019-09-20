@@ -73,6 +73,7 @@ class AsyncUpdater
                     break;
                 case AsyncManagement::ACTION_REFUND:
                     // @todo verify refund
+                    $this->completePending($async);
                     break;
             }
 

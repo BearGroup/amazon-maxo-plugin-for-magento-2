@@ -66,10 +66,6 @@ class ProcessAsync
 
     public function execute()
     {
-        if (UpdateMechanism::IPN === $this->coreHelper->getUpdateMechanism()) {
-            return;
-        }
-
         $collection = $this->asyncCollectionFactory
             ->create()
             ->addFilter(AsyncInterface::IS_PENDING, true)

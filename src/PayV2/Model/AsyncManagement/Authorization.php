@@ -21,9 +21,9 @@ use Magento\Sales\Api\Data\TransactionInterface as Transaction;
 class Authorization extends AbstractOperation
 {
     /**
-     * @var \Amazon\PayV2\Model\AmazonConfig
+     * @var \Magento\Sales\Api\OrderRepositoryInterface
      */
-    private $amazonConfig;
+    private $orderRepository;
 
     /**
      * @var \Amazon\PayV2\Model\Adapter\AmazonPayV2Adapter
@@ -31,48 +31,21 @@ class Authorization extends AbstractOperation
     private $amazonAdapter;
 
     /**
-     * @var \Magento\Sales\Api\OrderRepositoryInterface
-     */
-    private $orderRepository;
-
-    /**
-     * @var \Magento\Sales\Api\TransactionRepositoryInterface
-     */
-    private $transactionRepository;
-
-    /**
      * @var \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface
      */
     private $transactionBuilder;
 
-    /**
-     * @var \Magento\Framework\Api\SearchCriteriaBuilder
-     */
-    private $searchCriteriaBuilder;
-
-    /**
-     * Authorization constructor.
-     * @param \Amazon\PayV2\Model\AmazonConfig $amazonConfig
-     * @param \Amazon\PayV2\Model\Adapter\AmazonPayV2Adapter $amazonAdapter
-     * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
-     * @param \Magento\Sales\Api\TransactionRepositoryInterface $transactionRepository
-     * @param \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transactionBuilder
-     * @param \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder
-     */
     public function __construct(
-        \Amazon\PayV2\Model\AmazonConfig $amazonConfig,
-        \Amazon\PayV2\Model\Adapter\AmazonPayV2Adapter $amazonAdapter,
+        \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
         \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
         \Magento\Sales\Api\TransactionRepositoryInterface $transactionRepository,
-        \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transactionBuilder,
-        \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder
+        \Amazon\PayV2\Model\Adapter\AmazonPayV2Adapter $amazonAdapter,
+        \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transactionBuilder
     ) {
-        $this->amazonConfig = $amazonConfig;
-        $this->amazonAdapter = $amazonAdapter;
+        parent::__construct($orderRepository, $transactionRepository, $searchCriteriaBuilder);
         $this->orderRepository = $orderRepository;
-        $this->transactionRepository = $transactionRepository;
+        $this->amazonAdapter = $amazonAdapter;
         $this->transactionBuilder = $transactionBuilder;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
     /**
@@ -82,7 +55,7 @@ class Authorization extends AbstractOperation
      */
     public function processPendingAuthorization($transactionId)
     {
-        $transaction = $this->getTransaction($transactionId);
+        $transaction = $this->getTransaction($transactionId, Transaction::TYPE_AUTH);
 
         if ($transaction) {
             $order = $this->orderRepository->get($transaction->getOrderId());
@@ -126,26 +99,8 @@ class Authorization extends AbstractOperation
 
             } else {
                 throw new \Exception($response['reasonCode'] . ' ' . $response['message']);
-                // @todo error handling
             }
         }
     }
 
-    /**
-     * @param $transactionId
-     * @return mixed
-     */
-    protected function getTransaction($transactionId)
-    {
-        $this->searchCriteriaBuilder
-            ->addFilter(Transaction::TXN_ID, $transactionId)
-            ->addFilter(Transaction::TXN_TYPE, Transaction::TYPE_AUTH);
-
-        $searchCriteria = $this->searchCriteriaBuilder->create();
-        $transactionCollection = $this->transactionRepository->getList($searchCriteria);
-
-        if (count($transactionCollection)) {
-            return $transactionCollection->getFirstItem();
-        }
-    }
 }

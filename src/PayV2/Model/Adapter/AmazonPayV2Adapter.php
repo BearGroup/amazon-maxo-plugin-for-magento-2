@@ -153,6 +153,19 @@ class AmazonPayV2Adapter
     }
 
     /**
+     * Get charge
+     *
+     * @param $storeId
+     * @param $chargeId
+     * @return mixed
+     */
+    public function getCharge($storeId, $chargeId)
+    {
+        $response = $this->clientFactory->create($storeId)->getCharge($chargeId);
+        return $this->processResponse($response, __FUNCTION__);
+    }
+
+    /**
      * Create charge
      *
      * @param $storeId

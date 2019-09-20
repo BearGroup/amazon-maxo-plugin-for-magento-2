@@ -17,74 +17,75 @@ namespace Amazon\PayV2\Controller\Payment;
 
 use Amazon\Core\Logger\ExceptionLogger;
 use Magento\Framework\App\ObjectManager;
+use Aws\Sns\Message;
+use Aws\Sns\MessageValidator;
 
+/**
+ * Class Ipn
+ *
+ * IPN endpoint for Amazon Simple Notification Service
+ * @link https://docs.aws.amazon.com/sns/latest/dg/sns-http-https-endpoint-as-subscriber.html
+ */
 class Ipn extends \Magento\Framework\App\Action\Action
 {
-    /**
-     * @var ExceptionLogger
-     */
-    private $exceptionLogger;
-
-    /**
-     * @var \Amazon\Payment\Ipn\IpnHandlerFactoryInterface
-     */
-    private $ipnHandlerFactory;
-
-    /**
-     * @var \Amazon\Payment\Api\Ipn\CompositeProcessorInterface
-     */
-    private $compositeProcessor;
-
-    /**
-     * @var \Amazon\PayV2\Model\AmazonConfig
-     */
-    private $amazonConfig;
-
     /**
      * @var \Amazon\Core\Logger\IpnLogger
      */
     private $ipnLogger;
 
+    /**
+     * @var \Amazon\PayV2\Model\AsyncManagement\ChargeFactory
+     */
+    private $chargeFactory;
+
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
-        \Amazon\Payment\Ipn\IpnHandlerFactoryInterface $ipnHandlerFactory,
-        \Amazon\Payment\Api\Ipn\CompositeProcessorInterface $compositeProcessor,
-        \Amazon\PayV2\Model\AmazonConfig $amazonConfig,
+        \Amazon\PayV2\Model\AsyncManagement\ChargeFactory $chargeFactory,
         \Amazon\Core\Logger\IpnLogger $ipnLogger,
         ExceptionLogger $exceptionLogger = null
     ) {
+        // Bypass Magento's CsrfValidator (which rejects POST) and use Amazon SNS Message Validator instead
+        $context->getRequest()->setMethod('PUT');
         parent::__construct($context);
 
-        $this->ipnHandlerFactory = $ipnHandlerFactory;
-        $this->compositeProcessor = $compositeProcessor;
-        $this->amazonConfig = $amazonConfig;
         $this->exceptionLogger = $exceptionLogger ?: ObjectManager::getInstance()->get(ExceptionLogger::class);
         $this->ipnLogger = $ipnLogger;
+        $this->chargeFactory = $chargeFactory;
     }
 
     public function execute()
     {
-        if (!$this->amazonConfig->isEnabled()) {
-            return;
-        }
-
         try {
-            $message = $this->_request->getParam('Message');
-            $headers = $this->_request->getHeaders()->toArray();
-            $body = $this->_request->getContent();
+            //*
+            // Log server IPN requests for localdev testing (e.g. with Postman)
+            $this->ipnLogger->info(print_r($this->getRequest()->getHeaders()->toArray(), 1));
+            $this->ipnLogger->info($this->getRequest()->getContent());
+            //*/
 
-            $this->ipnLogger->info(print_r($headers, 1));
-            $this->ipnLogger->info($body);
-            $this->ipnLogger->info($message);
+            // Amazon SNS Message Validator
+            $snsMessage = Message::fromRawPostData();
+            $validator = new MessageValidator();
 
-            $message = json_decode($message, true);
+            // Message Validator checks SigningCertURL, SignatureVersion, and Signature
+            if ($validator->isValid($snsMessage)) {
+                $message = json_decode($snsMessage['Message'], true);
 
-            if ($message && isset($message['objectId'])) {
-
+                // Process message
+                if (isset($message['ObjectType'])) {
+                    switch ($message['ObjectType']) {
+                        case 'CHARGE':
+                            $this->chargeFactory->create()->processStateChange($message['ObjectId']);
+                            break;
+                        case 'REFUND':
+                            // @todo verify refund
+                            break;
+                    }
+                }
             }
 
         } catch (\Exception $e) {
             $this->exceptionLogger->logException($e);
+            $this->ipnLogger->debug(($e->getMessage()));
             throw $e;
         }
     }
