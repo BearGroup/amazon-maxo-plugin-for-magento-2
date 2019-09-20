@@ -371,11 +371,9 @@ class AmazonConfig
     /*
      * @return bool
      */
-    public function isAsyncAuthorization($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
+    public function canHandlePendingAuthorization($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
     {
-        $paymentAction = $this->getPaymentAction($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null);
-
-        return $paymentAction == 'authorize' && $this->scopeConfig->getValue(
+        return $this->scopeConfig->getValue(
             'payment/amazon_payment/authorization_mode',
             $scope,
             $scopeCode

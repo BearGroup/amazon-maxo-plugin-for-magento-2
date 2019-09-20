@@ -19,7 +19,7 @@ namespace Amazon\PayV2\Gateway\Request;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Amazon\PayV2\Gateway\Helper\SubjectReader;
 
-class AuthorizationRequestBuilder implements BuilderInterface
+class AuthorizationSaleRequestBuilder implements BuilderInterface
 {
     /**
      * @var SubjectReader
@@ -41,7 +41,6 @@ class AuthorizationRequestBuilder implements BuilderInterface
      */
     public function build(array $buildSubject)
     {
-        // Used for Authorization and Sale
 
         $quote = $this->subjectReader->getCheckoutQuote();
 

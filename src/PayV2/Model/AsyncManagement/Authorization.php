@@ -68,6 +68,10 @@ class Authorization extends AbstractOperation
         if ($transaction) {
             $order = $this->orderRepository->get($transaction->getOrderId());
 
+            if (!$order->isPaymentReview()) {
+                return;
+            }
+
             $response = $this->amazonAdapter->createCharge(
                 $order->getStoreId(),
                 $transactionId,

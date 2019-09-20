@@ -21,7 +21,7 @@ use Amazon\PayV2\Model\AsyncManagement;
 use Magento\Payment\Gateway\Response\HandlerInterface;
 use Magento\Sales\Model\Order\Payment;
 
-class AuthorizationHandler implements HandlerInterface
+class AuthorizationSaleHandler implements HandlerInterface
 {
     /**
      * @var SubjectReader
@@ -58,25 +58,48 @@ class AuthorizationHandler implements HandlerInterface
         $paymentDO = $this->subjectReader->readPayment($handlingSubject);
 
         if ($paymentDO->getPayment() instanceof Payment) {
-            /** @var Payment $orderPayment */
-            $orderPayment = $paymentDO->getPayment();
+            /** @var Payment $payment */
+            $payment = $paymentDO->getPayment();
 
-            // Successful Authorization
-            if (!empty($response['chargeId'])) {
-                $orderPayment->setTransactionId($response['chargeId']);
-            } else { // Pending Authorization
-                $order = $this->subjectReader->getCheckoutOrder();
+            $chargeState = $response['charge']['statusDetail']['state'];
 
-                $orderPayment->setIsTransactionPending(true);
-                $orderPayment->setTransactionId($response['chargePermissionId']);
-                $order->setState(\Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW)->setStatus(
-                    \Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW
-                );
-
-                $this->asyncManagement->queuePendingAuthorization($response['chargePermissionId']);
+            switch ($chargeState) {
+                case 'Authorized':
+                    $payment->setIsTransactionClosed(false);
+                    break;
+                case 'AuthorizationInitiated':
+                    $payment->setIsTransactionClosed(false);
+                    $this->setPending($payment);
+                    $this->asyncManagement->queuePendingAuthorization($response['chargePermissionId']);
+                    break;
+                case 'Captured':
+                    $payment->setIsTransactionClosed(true);
+                    break;
+                case 'CaptureInitated':
+                    $payment->setIsTransactionClosed(false);
+                    break;
             }
 
-            $orderPayment->setIsTransactionClosed(false);
+            if (!empty($response['chargeId'])) {
+                $payment->setTransactionId($response['chargeId']);
+            } else if (!empty($response['chargePermissionId'])) {
+                $payment->setTransactionId($response['chargePermissionId']);
+            }
+
         }
+    }
+
+    /**
+     * Set order as pending review
+     *
+     * @param $payment
+     */
+    private function setPending($payment)
+    {
+        $order = $this->subjectReader->getCheckoutOrder();
+        $payment->setIsTransactionPending(true);
+        $order->setState(\Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW)->setStatus(
+            \Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW
+        );
     }
 }

@@ -160,7 +160,7 @@ class Charge extends AbstractOperation
     }
 
     /**
-     * Pending charge (AuthorizationInitiated)
+     * Pending authorization charge (AuthorizationInitiated)
      *
      * @param \Magento\Sales\Model\Order $order
      * @param $chargePermissionId

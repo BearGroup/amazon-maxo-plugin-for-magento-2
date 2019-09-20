@@ -132,8 +132,8 @@ class AmazonPayV2Adapter
                 )
             ],
             'paymentDetails' => [
-                'paymentIntent' => $this->amazonConfig->isAsyncAuthorization() ? 'Confirm' : 'Authorize',
-                'canHandlePendingAuthorization' => !$this->amazonConfig->isAsyncAuthorization(),
+                'paymentIntent' => 'Authorize',
+                'canHandlePendingAuthorization' => $this->amazonConfig->canHandlePendingAuthorization(),
                 'chargeAmount' => [
                     'amount' => $quote->getGrandTotal(),
                     'currencyCode' => $store->getCurrentCurrency()->getCode(),
@@ -260,7 +260,7 @@ class AmazonPayV2Adapter
     }
 
     /**
-     * Authorize Gateway Command
+     * AuthorizeClient and SaleClient Gateway Command
      *
      * @param $data
      */
@@ -268,14 +268,21 @@ class AmazonPayV2Adapter
     {
         $quote = $this->quoteRepository->get($data['quote_id']);
         $response = $this->getCheckoutSession($quote->getStoreId(), $data['amazon_checkout_session_id']);
-        if ($captureNow && !empty($response['chargeId'])) {
-            $response = $this->captureCharge(
-                $quote->getStoreId(),
-                $response['chargeId'],
-                $quote->getGrandTotal(),
-                $quote->getStore()->getCurrentCurrency()->getCode()
-            );
+        if (!empty($response['chargeId'])) {
+            // Get charge for async checkout
+            $charge = $this->getCharge($quote->getStoreId(), $response['chargeId']);
+
+            if ($captureNow && $charge['statusDetail']['state'] == 'Authorized') {
+                $response = $this->captureCharge(
+                    $quote->getStoreId(),
+                    $response['chargeId'],
+                    $quote->getGrandTotal(),
+                    $quote->getStore()->getCurrentCurrency()->getCode()
+                );
+            }
+            $response['charge'] = $charge;
         }
+
         return $response;
     }
 
