@@ -110,11 +110,8 @@ class Charge extends AbstractOperation
                     case 'Canceled':
                         $this->cancel($order, $charge['statusDetail']);
                         break;
-                    case 'AuthorizationInitiated':
-                        $this->pending($order, $charge['chargePermissionId']);
-                        break;
                     case 'Authorized':
-                        $this->authorize($order, $charge['chargePermissionId']);
+                        $this->authorize($order, $charge['chargeId']);
                         break;
                     case 'Captured':
                         $this->capture($order, $charge);
@@ -131,7 +128,7 @@ class Charge extends AbstractOperation
      */
     public function decline($order, $detail)
     {
-        if ($order->canHold()) {
+        if ($order->canHold() || $order->isPaymentReview()) {
             $this->setOnHold($order);
             $this->closeLastTransaction($order);
             $order->addStatusHistoryComment($detail['reasonDescription']);
@@ -160,45 +157,29 @@ class Charge extends AbstractOperation
     }
 
     /**
-     * Pending authorization charge (AuthorizationInitiated)
-     *
+     * Authorize pending charge (AuthorizationInitiated)
      * @param \Magento\Sales\Model\Order $order
-     * @param $chargePermissionId
+     * @param $chargeId
      */
-    public function pending($order, $chargePermissionId)
+    public function authorize($order, $chargeId)
     {
-        if (!$order->isPaymentReview()) {
-            $this->setPaymentReview($order);
-
+        if ($order->isPaymentReview()) {
+            $this->setProcessing($order);
             $payment = $order->getPayment();
 
             $transaction = $this->transactionBuilder->setPayment($payment)
                 ->setOrder($order)
-                ->setTransactionId($chargePermissionId)
+                ->setTransactionId($chargeId)
                 ->setFailSafe(true)
                 ->build(Transaction::TYPE_AUTH);
 
             $formattedAmount = $order->getBaseCurrency()->formatTxt($payment->getBaseAmountAuthorized());
-            $message = __('Authorization initiated amount of %1.', $formattedAmount);
+            $message = __('Authorized amount of %1.', $formattedAmount);
             $payment->addTransactionCommentsToOrder($transaction, $message);
             $payment->setIsTransactionClosed(false);
-            $payment->setParentTransactionId($chargePermissionId);
+            $payment->setParentTransactionId($chargeId);
 
             $order->save();
-
-            $this->asyncManagement->queuePendingAuthorization($chargePermissionId);
-        }
-    }
-
-    /**
-     * Charge successfully authorized and no longer pending
-     * @param \Magento\Sales\Model\Order $order
-     * @param $chargePermissionId
-     */
-    public function authorize($order, $chargePermissionId)
-    {
-        if ($order->isPaymentReview()) {
-            $this->authorizationFactory->create()->processPendingAuthorization($chargePermissionId);
         }
     }
 
