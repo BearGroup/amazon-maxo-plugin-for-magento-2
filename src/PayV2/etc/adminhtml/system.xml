@@ -83,6 +83,9 @@
                         <label>IPN URL</label>
                         <frontend_model>Amazon\PayV2\Block\Adminhtml\Form\Field\IpnUrl</frontend_model>
                         <comment><![CDATA[Add this url in SellerCentral to enable IPN.]]></comment>
+                        <depends>
+                            <field id="payment/us/amazon_payment/api_version">2</field>
+                        </depends>
                     </field>
                     <!-- hide -->
                     <field id="merchant_id" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
