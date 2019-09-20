@@ -24,7 +24,7 @@ class ProcessAsync
     /**
      * @var \Amazon\PayV2\Model\ResourceModel\Async\CollectionFactory
      */
-    private $collectionFactory;
+    private $asyncCollectionFactory;
 
     /**
      * @var \Amazon\PayV2\Model\AsyncUpdaterFactory
@@ -32,24 +32,19 @@ class ProcessAsync
     private $asyncUpdater;
 
     /**
-     * @var \Amazon\Core\Helper\Data
-     */
-    private $coreHelper;
-
-    /**
-     * @var \Amazon\PayV2\Model\ResourceModel\Async\CollectionFactory
-     */
-    private $asyncCollectionFactory;
-
-    /**
      * @var int
      */
     private $limit;
 
+    /**
+     * ProcessAsync constructor.
+     * @param \Amazon\PayV2\Model\ResourceModel\Async\CollectionFactory $asyncCollectionFactory
+     * @param \Amazon\PayV2\Model\AsyncUpdater $asyncUpdater
+     * @param int $limit
+     */
     public function __construct(
         \Amazon\PayV2\Model\ResourceModel\Async\CollectionFactory $asyncCollectionFactory,
         \Amazon\PayV2\Model\AsyncUpdater $asyncUpdater,
-        \Amazon\Core\Helper\Data $coreHelper,
         $limit = 100
     ) {
         $limit = (int)$limit;
@@ -60,7 +55,6 @@ class ProcessAsync
 
         $this->asyncCollectionFactory = $asyncCollectionFactory;
         $this->asyncUpdater = $asyncUpdater;
-        $this->coreHelper = $coreHelper;
         $this->limit = $limit;
     }
 
