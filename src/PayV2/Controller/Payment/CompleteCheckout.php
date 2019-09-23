@@ -90,6 +90,7 @@ class CompleteCheckout extends \Magento\Framework\App\Action\Action
                     $this->checkoutSession->getQuote()->setCheckoutMethod(CartManagementInterface::METHOD_GUEST);
                 }
                 $this->cartManagement->placeOrder($this->checkoutSession->getQuoteId());
+                $this->cartManagement->createEmptyCart();
                 $this->amazonCheckoutSession->clearCheckoutSessionId();
                 return $this->_redirect('checkout/onepage/success');
             } catch (\Exception $e) {
