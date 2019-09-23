@@ -24,7 +24,8 @@ define([
 
     $.widget('amazon.AmazonProductAdd', {
         options: {
-            addToCartForm: '#product_addtocart_form'
+            addToCartForm: '#product_addtocart_form',
+            parentSelector: '.amazon-button-product-page'
         },
 
         /**
@@ -32,6 +33,10 @@ define([
          */
         _create: function () {
             _this = this;
+            // Hide for Edge, since click event does not trigger
+            if (/Edge\/\d./i.test(navigator.userAgent)) {
+                $(parentSelector).hide();
+            }
             this.setupTriggers();
         },
 
@@ -46,7 +51,7 @@ define([
                 //only trigger the amazon button click if the user has chosen to add to cart via this method
                 if (addedViaAmazon) {
                     addedViaAmazon = false;
-                    $('.amazon-button-product-page .amazon-checkout-button').trigger('click');
+                    $(parentSelector + ' .amazon-checkout-button').trigger('click');
                 }
             }, this);
 
