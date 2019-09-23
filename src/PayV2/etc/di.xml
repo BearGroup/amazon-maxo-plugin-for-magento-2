@@ -36,9 +36,6 @@
             <argument name="logger" xsi:type="object">Amazon\PayV2\Logger\Logger</argument>
         </arguments>
     </type>
-    <type name="Amazon\Core\Helper\Data">
-        <plugin name="amazon_payv2_amazon_core_helper" type="Amazon\PayV2\Plugin\AmazonCoreHelperData" sortOrder="1" />
-    </type>
 
     <type name="Magento\Checkout\Model\PaymentInformationManagement">
         <plugin name="amazon_payv2_save_payment_info" type="Amazon\PayV2\Plugin\SavePaymentInformation" sortOrder="100" disabled="false"/>
