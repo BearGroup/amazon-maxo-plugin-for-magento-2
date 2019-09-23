@@ -19,9 +19,9 @@ namespace Amazon\PayV2\Model;
 class AsyncUpdater
 {
     /**
-     * @var AsyncManagement\AuthorizationFactory
+     * @var AsyncManagement\ChargeFactory
      */
-    private $authorizationFactory;
+    private $chargeFactory;
 
     /**
      * @var \Amazon\PayV2\Api\Data\AsyncInterfaceFactory
@@ -40,18 +40,18 @@ class AsyncUpdater
 
     /**
      * AsyncUpdater constructor.
-     * @param AsyncManagement\AuthorizationFactory $authorizationFactory
+     * @param AsyncManagement\ChargeFactory $chargeFactory
      * @param \Amazon\PayV2\Api\Data\AsyncInterfaceFactory $asyncFactory
      * @param \Magento\Framework\Notification\NotifierInterface $adminNotifier
      * @param \Psr\Log\LoggerInterface $logger
      */
     public function __construct(
-        \Amazon\PayV2\Model\AsyncManagement\AuthorizationFactory $authorizationFactory,
+        \Amazon\PayV2\Model\AsyncManagement\ChargeFactory $chargeFactory,
         \Amazon\PayV2\Api\Data\AsyncInterfaceFactory $asyncFactory,
         \Magento\Framework\Notification\NotifierInterface $adminNotifier,
         \Psr\Log\LoggerInterface $logger
     ) {
-        $this->authorizationFactory = $authorizationFactory;
+        $this->chargeFactory = $chargeFactory;
         $this->asyncFactory = $asyncFactory;
         $this->adminNotifier = $adminNotifier;
         $this->logger = $logger;
@@ -68,7 +68,7 @@ class AsyncUpdater
 
             switch ($async->getPendingAction()) {
                 case AsyncManagement::ACTION_AUTH:
-                    $this->authorizationFactory->create()->processPendingAuthorization($async->getPendingId());
+                    $this->chargeFactory->create()->processStateChange($async->getPendingId());
                     $this->completePending($async);
                     break;
                 case AsyncManagement::ACTION_REFUND:

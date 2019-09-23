@@ -61,6 +61,8 @@ class AuthorizationSaleHandler implements HandlerInterface
             /** @var Payment $payment */
             $payment = $paymentDO->getPayment();
 
+            $payment->setTransactionId($response['chargeId']);
+
             $chargeState = $response['charge']['statusDetail']['state'];
 
             switch ($chargeState) {
@@ -70,7 +72,7 @@ class AuthorizationSaleHandler implements HandlerInterface
                 case 'AuthorizationInitiated':
                     $payment->setIsTransactionClosed(false);
                     $this->setPending($payment);
-                    $this->asyncManagement->queuePendingAuthorization($response['chargePermissionId']);
+                    $this->asyncManagement->queuePendingAuthorization($response['chargeId']);
                     break;
                 case 'Captured':
                     $payment->setIsTransactionClosed(true);
@@ -79,13 +81,6 @@ class AuthorizationSaleHandler implements HandlerInterface
                     $payment->setIsTransactionClosed(false);
                     break;
             }
-
-            if (!empty($response['chargeId'])) {
-                $payment->setTransactionId($response['chargeId']);
-            } else if (!empty($response['chargePermissionId'])) {
-                $payment->setTransactionId($response['chargePermissionId']);
-            }
-
         }
     }
 

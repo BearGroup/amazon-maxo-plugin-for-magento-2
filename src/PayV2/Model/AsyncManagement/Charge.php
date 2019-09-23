@@ -26,16 +26,6 @@ class Charge extends AbstractOperation
     private $amazonAdapter;
 
     /**
-     * @var \Amazon\PayV2\Model\AsyncManagement
-     */
-    private $asyncManagement;
-
-    /**
-     * @var AuthorizationFactory
-     */
-    private $authorizationFactory;
-
-    /**
      * @var \Magento\Sales\Model\Service\InvoiceService
      */
     private $invoiceService;
@@ -61,8 +51,6 @@ class Charge extends AbstractOperation
      * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
      * @param \Magento\Sales\Api\TransactionRepositoryInterface $transactionRepository
      * @param \Amazon\PayV2\Model\Adapter\AmazonPayV2Adapter $amazonAdapter
-     * @param \Amazon\PayV2\Model\AsyncManagement $asyncManagement
-     * @param AuthorizationFactory $authorizationFactory
      * @param \Magento\Sales\Model\Service\InvoiceService $invoiceService
      * @param \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transactionBuilder
      * @param \Magento\Framework\Notification\NotifierInterface $notifier
@@ -73,8 +61,6 @@ class Charge extends AbstractOperation
         \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
         \Magento\Sales\Api\TransactionRepositoryInterface $transactionRepository,
         \Amazon\PayV2\Model\Adapter\AmazonPayV2Adapter $amazonAdapter,
-        \Amazon\PayV2\Model\AsyncManagement $asyncManagement,
-        AuthorizationFactory $authorizationFactory,
         \Magento\Sales\Model\Service\InvoiceService $invoiceService,
         \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transactionBuilder,
         \Magento\Framework\Notification\NotifierInterface $notifier,
@@ -82,8 +68,6 @@ class Charge extends AbstractOperation
     ) {
         parent::__construct($orderRepository, $transactionRepository, $searchCriteriaBuilder);
         $this->amazonAdapter = $amazonAdapter;
-        $this->asyncManagement = $asyncManagement;
-        $this->authorizationFactory = $authorizationFactory;
         $this->invoiceService = $invoiceService;
         $this->transactionBuilder = $transactionBuilder;
         $this->notifier = $notifier;
