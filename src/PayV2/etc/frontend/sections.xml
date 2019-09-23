@@ -4,5 +4,6 @@
     <action name="amazon_payv2/payment/completeCheckout">
         <section name="cart"/>
         <section name="checkout-data"/>
+        <section name="last-ordered-items"/>
     </action>
 </config>
