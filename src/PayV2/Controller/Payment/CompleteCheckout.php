@@ -16,6 +16,7 @@
 namespace Amazon\PayV2\Controller\Payment;
 
 use Magento\Framework\App\ObjectManager;
+use Magento\Quote\Api\CartManagementInterface;
 use Amazon\Core\Logger\ExceptionLogger;
 
 /**
@@ -31,24 +32,47 @@ class CompleteCheckout extends \Magento\Framework\App\Action\Action
     private $amazonCheckoutSession;
 
     /**
-     * @var \Magento\Checkout\Model\Type\Onepage
+     * @var \Magento\Checkout\Model\Session
      */
-    private $onepage;
+    private $checkoutSession;
+
+    /**
+     * @var \Magento\Customer\Model\Session
+     */
+    private $session;
+
+    /**
+     * @var CartManagementInterface
+     */
+    private $cartManagement;
 
     /**
      * @var ExceptionLogger
      */
     private $exceptionLogger;
 
+    /**
+     * CompleteCheckout constructor.
+     * @param \Magento\Framework\App\Action\Context $context
+     * @param \Amazon\PayV2\CustomerData\CheckoutSession $amazonCheckoutSession
+     * @param CartManagementInterface $cartManagement
+     * @param \Magento\Checkout\Model\Session $checkoutSession
+     * @param \Magento\Customer\Model\Session $session
+     * @param ExceptionLogger|null $exceptionLogger
+     */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
         \Amazon\PayV2\CustomerData\CheckoutSession $amazonCheckoutSession,
-        \Magento\Checkout\Model\Type\Onepage $onepage,
+        CartManagementInterface $cartManagement,
+        \Magento\Checkout\Model\Session $checkoutSession,
+        \Magento\Customer\Model\Session $session,
         ExceptionLogger $exceptionLogger = null
     ) {
         parent::__construct($context);
         $this->amazonCheckoutSession = $amazonCheckoutSession;
-        $this->onepage = $onepage;
+        $this->cartManagement = $cartManagement;
+        $this->checkoutSession = $checkoutSession;
+        $this->session = $session;
         $this->exceptionLogger = $exceptionLogger ?: ObjectManager::getInstance()->get(ExceptionLogger::class);
     }
 
@@ -59,10 +83,13 @@ class CompleteCheckout extends \Magento\Framework\App\Action\Action
     {
         $checkoutSessionId = $this->getRequest()->getParam('amazonCheckoutSessionId');
 
-        // Save Order
+        // Place Order
         if ($checkoutSessionId === $this->amazonCheckoutSession->getCheckoutSessionId()) {
             try {
-                $this->onepage->saveOrder();
+                if (!$this->session->isLoggedIn()) {
+                    $this->checkoutSession->getQuote()->setCheckoutMethod(CartManagementInterface::METHOD_GUEST);
+                }
+                $this->cartManagement->placeOrder($this->checkoutSession->getQuoteId());
                 $this->amazonCheckoutSession->clearCheckoutSessionId();
                 return $this->_redirect('checkout/onepage/success');
             } catch (\Exception $e) {
