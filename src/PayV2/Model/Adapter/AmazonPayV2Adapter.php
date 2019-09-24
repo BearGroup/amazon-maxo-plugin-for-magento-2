@@ -243,6 +243,19 @@ class AmazonPayV2Adapter
     }
 
     /**
+     * Get refund
+     *
+     * @param $storeId
+     * @param $refundId
+     * @return mixed
+     */
+    public function getRefund($storeId, $refundId)
+    {
+        $response = $this->clientFactory->create($storeId)->getRefund($refundId);
+        return $this->processResponse($response, __FUNCTION__);
+    }
+
+    /**
      * Cancel charge
      *
      * @param $storeId

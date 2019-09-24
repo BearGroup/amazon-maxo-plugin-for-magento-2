@@ -26,6 +26,11 @@ class Refund extends AbstractOperation
     private $amazonAdapter;
 
     /**
+     * @var \Amazon\PayV2\Logger\AsyncIpnLogger
+     */
+    private $asyncLogger;
+
+    /**
      * @var \Magento\Sales\Model\Service\InvoiceService
      */
     private $invoiceService;
@@ -46,11 +51,12 @@ class Refund extends AbstractOperation
     private $urlBuilder;
 
     /**
-     * Charge constructor.
+     * Refund constructor.
      * @param \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder
      * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
      * @param \Magento\Sales\Api\TransactionRepositoryInterface $transactionRepository
      * @param \Amazon\PayV2\Model\Adapter\AmazonPayV2Adapter $amazonAdapter
+     * @param \Amazon\PayV2\Logger\AsyncIpnLogger $asyncLogger
      * @param \Magento\Sales\Model\Service\InvoiceService $invoiceService
      * @param \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transactionBuilder
      * @param \Magento\Framework\Notification\NotifierInterface $notifier
@@ -61,6 +67,7 @@ class Refund extends AbstractOperation
         \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
         \Magento\Sales\Api\TransactionRepositoryInterface $transactionRepository,
         \Amazon\PayV2\Model\Adapter\AmazonPayV2Adapter $amazonAdapter,
+        \Amazon\PayV2\Logger\AsyncIpnLogger $asyncLogger,
         \Magento\Sales\Model\Service\InvoiceService $invoiceService,
         \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transactionBuilder,
         \Magento\Framework\Notification\NotifierInterface $notifier,
@@ -68,6 +75,7 @@ class Refund extends AbstractOperation
     ) {
         parent::__construct($orderRepository, $transactionRepository, $searchCriteriaBuilder);
         $this->amazonAdapter = $amazonAdapter;
+        $this->asyncLogger = $asyncLogger;
         $this->invoiceService = $invoiceService;
         $this->transactionBuilder = $transactionBuilder;
         $this->notifier = $notifier;
@@ -75,10 +83,28 @@ class Refund extends AbstractOperation
     }
 
     /**
-     * Process refund
+     * Verify refund
      */
     public function processRefund($refundId)
     {
-        // @todo verify refund
+        /** @var \Magento\Sales\Model\Order $order */
+        $order = $this->loadOrder($refundId);
+
+        if ($order) {
+            $refund = $this->amazonAdapter->getRefund($order->getStoreId(), $refundId);
+            if (isset($refund['statusDetail']) && $refund['statusDetail']['state'] == 'Declined') {
+
+                $order->addStatusHistoryComment($refund['statusDetail']['reasonDescription']);
+                $order->save();
+
+                $this->notifier->addNotice(
+                    __('Refund declined'),
+                    __('Refund declined for Order #%1', $order->getIncrementId()),
+                    $this->urlBuilder->getUrl('sales/order/view', ['order_id' => $order->getId()])
+                );
+
+                $this->asyncLogger->info('Refund declined for Order #' . $order->getIncrementId());
+            }
+        }
     }
 }
