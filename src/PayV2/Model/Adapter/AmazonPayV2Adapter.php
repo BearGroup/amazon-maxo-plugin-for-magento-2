@@ -326,9 +326,8 @@ class AmazonPayV2Adapter
             $this->logger->error($functionName . ' ' . $response['status'], $response);
             $debugBackTrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
             $this->logger->debug($functionName . ' backtrace', $debugBackTrace[2]);
-        }
-        // Log full response if dev
-        else if ($this->amazonConfig->isLoggingDeveloper()) {
+        } elseif ($this->amazonConfig->isLoggingDeveloper()) {
+            // Log full response if dev
             $debugBackTrace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
             $this->logger->debug($functionName, $debugBackTrace[1]['args']);
             $this->logger->debug(print_r($response, true));

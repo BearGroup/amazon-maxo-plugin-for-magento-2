@@ -126,10 +126,11 @@ class DeveloperLogs extends \Magento\Config\Block\System\Config\Form\Field
         $links = [];
 
         foreach (self::LOGS as $name => $data) {
-            $links[] = ['link' => $this->urlBuilder->getUrl(self::DOWNLOAD_PATH, ['type' => $data['type']]), 'name' => $data['name']];
+            $links[] = ['link' => $this->urlBuilder->getUrl(self::DOWNLOAD_PATH, [
+                'type' => $data['type']]),
+                'name' => $data['name']];
         }
 
         return $links;
     }
-
 }

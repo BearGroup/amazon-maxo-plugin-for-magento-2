@@ -121,6 +121,4 @@ abstract class AbstractOperation
         $transaction = $this->getTransaction($transactionId);
         $transaction->setIsClosed(true)->save();
     }
-
-
 }

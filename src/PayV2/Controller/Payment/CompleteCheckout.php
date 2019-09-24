@@ -62,7 +62,6 @@ class CompleteCheckout extends \Magento\Framework\App\Action\Action
      */
     private $cookieMetadataFactory;
 
-
     /**
      * CompleteCheckout constructor.
      * @param \Magento\Framework\App\Action\Context $context
@@ -147,5 +146,4 @@ class CompleteCheckout extends \Magento\Framework\App\Action\Action
             ->setHttpOnly(false);
         $this->cookieManager->setPublicCookie(Version::COOKIE_NAME, $this->generateValue(), $publicCookieMetadata);
     }
-
 }

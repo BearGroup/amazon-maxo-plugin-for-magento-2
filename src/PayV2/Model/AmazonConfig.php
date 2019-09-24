@@ -426,11 +426,11 @@ class AmazonConfig
     }
 
    /**
-     * @param string $scope
-     * @param null|string $scopeCode
-     *
-     * @return bool
-     */
+    * @param string $scope
+    * @param null|string $scopeCode
+    *
+    * @return bool
+    */
     public function isPayButtonAvailableOnProductPage($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
     {
         return $this->scopeConfig->isSetFlag('payment/amazon_payment/pwa_pp_button_is_visible', $scope, $scopeCode);
@@ -446,5 +446,4 @@ class AmazonConfig
     {
         return $this->scopeConfig->isSetFlag('payment/amazonlogin/active', $scope, $scopeCode);
     }
-
 }
