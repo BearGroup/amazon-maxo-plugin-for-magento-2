@@ -125,16 +125,8 @@ class DeveloperLogs extends \Magento\Config\Block\System\Config\Form\Field
     {
         $links = [];
 
-        $path = $this->directoryList->getPath(\Magento\Framework\App\Filesystem\DirectoryList::ROOT);
-
         foreach (self::LOGS as $name => $data) {
-            $filePath = $data['path'];
-
-            $exists = file_exists($path . $filePath);
-
-            if ($exists) {
-                $links[] = ['link' => $this->urlBuilder->getUrl(self::DOWNLOAD_PATH, ['type' => $data['type']]), 'name' => $data['name']];
-            }
+            $links[] = ['link' => $this->urlBuilder->getUrl(self::DOWNLOAD_PATH, ['type' => $data['type']]), 'name' => $data['name']];
         }
 
         return $links;
