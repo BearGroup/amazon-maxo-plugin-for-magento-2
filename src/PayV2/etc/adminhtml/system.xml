@@ -195,6 +195,21 @@
                             </depends>
                         </field>
                     </group>
+                    <group id="extra_options" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <field id="loglist_v2" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                            <label>Developer Logs</label>
+                            <depends>
+                                <field id="logging">1</field>
+                                <field id="payment/us/amazon_payment/api_version">2</field>
+                            </depends>
+                            <frontend_model>Amazon\PayV2\Block\Adminhtml\System\Config\Form\DeveloperLogs</frontend_model>
+                        </field>
+                        <field id="loglist" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                            <depends>
+                                <field id="payment/us/amazon_payment/api_version">1</field>
+                            </depends>
+                        </field>
+                    </group>
                 </group>
             </group>
         </section>

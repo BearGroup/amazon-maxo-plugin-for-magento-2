@@ -17,7 +17,7 @@ namespace Amazon\PayV2\Controller\Payment;
 
 use Magento\Framework\App\ObjectManager;
 use Magento\Quote\Api\CartManagementInterface;
-use Amazon\Core\Logger\ExceptionLogger;
+use Amazon\PayV2\Logger\ExceptionLogger;
 use Magento\Framework\App\PageCache\Version;
 
 /**

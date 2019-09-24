@@ -25,7 +25,7 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Api\FilterBuilder;
 use Magento\Sales\Api\Data\TransactionInterface;
 use Magento\Framework\App\ObjectManager;
-use Amazon\Core\Logger\ExceptionLogger;
+use Amazon\PayV2\Logger\ExceptionLogger;
 
 class CaptureStrategyCommand implements CommandInterface
 {

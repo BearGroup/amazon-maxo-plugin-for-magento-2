@@ -26,6 +26,11 @@ class Charge extends AbstractOperation
     private $amazonAdapter;
 
     /**
+     * @var \Amazon\PayV2\Logger\AsyncIpnLogger
+     */
+    private $asyncLogger;
+
+    /**
      * @var \Magento\Sales\Model\Service\InvoiceService
      */
     private $invoiceService;
@@ -61,6 +66,7 @@ class Charge extends AbstractOperation
         \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
         \Magento\Sales\Api\TransactionRepositoryInterface $transactionRepository,
         \Amazon\PayV2\Model\Adapter\AmazonPayV2Adapter $amazonAdapter,
+        \Amazon\PayV2\Logger\AsyncIpnLogger $asyncLogger,
         \Magento\Sales\Model\Service\InvoiceService $invoiceService,
         \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface $transactionBuilder,
         \Magento\Framework\Notification\NotifierInterface $notifier,
@@ -68,6 +74,7 @@ class Charge extends AbstractOperation
     ) {
         parent::__construct($orderRepository, $transactionRepository, $searchCriteriaBuilder);
         $this->amazonAdapter = $amazonAdapter;
+        $this->asyncLogger = $asyncLogger;
         $this->invoiceService = $invoiceService;
         $this->transactionBuilder = $transactionBuilder;
         $this->notifier = $notifier;
@@ -123,6 +130,8 @@ class Charge extends AbstractOperation
                 __('Charge declined for Order #%1', $order->getIncrementId()),
                 $this->urlBuilder->getUrl('sales/order/view', ['order_id' => $order->getId()])
             );
+
+            $this->asyncLogger->info('Charge declined for Order #' . $order->getIncrementId());
         }
     }
 
@@ -137,6 +146,7 @@ class Charge extends AbstractOperation
             $order->addStatusHistoryComment($detail['reasonCode'] . ' - ' . $detail['reasonDescription']);
             $order->cancel();
             $order->save();
+            $this->asyncLogger->info('Canceled Order #' . $order->getIncrementId());
         }
     }
 
@@ -164,6 +174,7 @@ class Charge extends AbstractOperation
             $payment->setParentTransactionId($chargeId);
 
             $order->save();
+            $this->asyncLogger->info('Set Processing for Order #' . $order->getIncrementId());
         }
     }
 
@@ -196,6 +207,7 @@ class Charge extends AbstractOperation
             $payment->addTransactionCommentsToOrder($transaction, $message);
             $this->setProcessing($order);
             $order->save();
+            $this->asyncLogger->info('Captured Order #' . $order->getIncrementId());
         }
     }
 }

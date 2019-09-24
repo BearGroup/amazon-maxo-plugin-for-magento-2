@@ -42,7 +42,7 @@ class AmazonPayV2Adapter
     private $quoteRepository;
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var \Amazon\PayV2\Logger\Logger
      */
     private $logger;
 
@@ -52,14 +52,14 @@ class AmazonPayV2Adapter
      * @param \Amazon\PayV2\Model\AmazonConfig $amazonConfig
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param \Magento\Quote\Api\CartRepositoryInterface $quoteRepository
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param \Amazon\PayV2\Logger\Logger $logger
      */
     public function __construct(
         \Amazon\PayV2\Client\ClientFactoryInterface $clientFactory,
         \Amazon\PayV2\Model\AmazonConfig $amazonConfig,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magento\Quote\Api\CartRepositoryInterface $quoteRepository,
-        \Psr\Log\LoggerInterface $logger
+        \Amazon\PayV2\Logger\Logger $logger
     ) {
         $this->clientFactory = $clientFactory;
         $this->amazonConfig = $amazonConfig;
@@ -306,6 +306,19 @@ class AmazonPayV2Adapter
         // Add HTTP response status code
         if (isset($clientResponse['status'])) {
             $response['status'] = $clientResponse['status'];
+        }
+
+        // Log error
+        if (!in_array($response['status'], [200, 201]) && $this->amazonConfig->isLoggingEnabled()) {
+            $this->logger->error($functionName . ' ' . $response['status'], $response);
+            $debugBackTrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+            $this->logger->debug($functionName . ' backtrace', $debugBackTrace[2]);
+        }
+        // Log full response if dev
+        else if ($this->amazonConfig->isLoggingDeveloper()) {
+            $debugBackTrace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
+            $this->logger->debug($functionName, $debugBackTrace[1]['args']);
+            $this->logger->debug(print_r($response, true));
         }
 
         return $response;

@@ -15,10 +15,6 @@
  */
 namespace Amazon\PayV2\Controller\Checkout;
 
-use Magento\Framework\App\ObjectManager;
-use Magento\Quote\Api\CartManagementInterface;
-use Amazon\Core\Logger\ExceptionLogger;
-
 /**
  * Class CreateSession
  */

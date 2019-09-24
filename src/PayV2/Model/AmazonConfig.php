@@ -36,6 +36,11 @@ class AmazonConfig
     private $clientIpHelper;
 
     /**
+     * @var \Magento\Framework\App\State
+     */
+    private $appState;
+
+    /**
      * AmazonConfig constructor.
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
@@ -45,12 +50,14 @@ class AmazonConfig
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Amazon\Core\Helper\ClientIp $clientIpHelper,
-        \Magento\Framework\UrlInterface $urlBuilder
+        \Magento\Framework\UrlInterface $urlBuilder,
+        \Magento\Framework\App\State $appState
     ) {
         $this->storeManager = $storeManager;
         $this->scopeConfig = $scopeConfig;
         $this->clientIpHelper = $clientIpHelper;
         $this->urlBuilder = $urlBuilder;
+        $this->appState = $appState;
     }
 
     /*
@@ -137,6 +144,14 @@ class AmazonConfig
             $scope,
             $scopeCode
         );
+    }
+
+    /**
+     * Is logging for developer mode?
+     */
+    public function isLoggingDeveloper()
+    {
+        return $this->appState->getMode() == \Magento\Framework\App\State::MODE_DEVELOPER;
     }
 
     /**

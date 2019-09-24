@@ -23,12 +23,26 @@
     <preference for="Amazon\PayV2\Api\AddressManagementInterface" type="Amazon\PayV2\Model\AddressManagement" />
     <preference for="Amazon\PayV2\Api\Data\AsyncInterface" type="Amazon\PayV2\Model\Async" />
 
+    <!-- Loggers -->
     <type name="Amazon\PayV2\Logger\Logger">
         <arguments>
-            <argument name="name" xsi:type="string">amazonClientLogger</argument>
+            <argument name="name" xsi:type="string">amazonClientLoggerV2</argument>
             <argument name="handlers" xsi:type="array">
                 <item name="debug" xsi:type="object">Amazon\PayV2\Logger\Handler\Client</item>
             </argument>
+        </arguments>
+    </type>
+    <type name="Amazon\PayV2\Logger\AsyncIpnLogger">
+        <arguments>
+            <argument name="name" xsi:type="string">amazonAsyncIpnLogger</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="debug" xsi:type="object">Amazon\PayV2\Logger\Handler\AsyncIpn</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Amazon\PayV2\Logger\ExceptionLogger">
+        <arguments>
+            <argument name="logger" xsi:type="object">Amazon\PayV2\Logger\Logger</argument>
         </arguments>
     </type>
     <type name="Amazon\PayV2\Client\ClientFactory">

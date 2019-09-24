@@ -15,7 +15,6 @@
  */
 namespace Amazon\PayV2\Controller\Payment;
 
-use Amazon\Core\Logger\ExceptionLogger;
 use Magento\Framework\App\ObjectManager;
 use Aws\Sns\Message;
 use Aws\Sns\MessageValidator;
@@ -29,42 +28,65 @@ use Aws\Sns\MessageValidator;
 class Ipn extends \Magento\Framework\App\Action\Action
 {
     /**
-     * @var \Amazon\Core\Logger\IpnLogger
+     * @var \Amazon\PayV2\Model\AmazonConfig
      */
-    private $ipnLogger;
+    private $amazonConfig;
 
     /**
      * @var \Amazon\PayV2\Model\AsyncManagement\ChargeFactory
      */
     private $chargeFactory;
 
+    /**
+     * @var \Amazon\PayV2\Model\AsyncManagement\RefundFactory
+     */
+    private $refundFactory;
+
+    /**
+     * @var \Amazon\PayV2\Logger\AsyncIpnLogger
+     */
+    private $ipnLogger;
+
+    /**
+     * Ipn constructor.
+     * @param \Magento\Framework\App\Action\Context $context
+     * @param \Amazon\PayV2\Model\AmazonConfig $amazonConfig
+     * @param \Amazon\PayV2\Model\AsyncManagement\ChargeFactory $chargeFactory
+     * @param \Amazon\PayV2\Model\AsyncManagement\RefundFactory $refundFactory
+     * @param \Amazon\PayV2\Logger\AsyncIpnLogger $ipnLogger
+     */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
+        \Amazon\PayV2\Model\AmazonConfig $amazonConfig,
         \Amazon\PayV2\Model\AsyncManagement\ChargeFactory $chargeFactory,
-        \Amazon\Core\Logger\IpnLogger $ipnLogger,
-        ExceptionLogger $exceptionLogger = null
+        \Amazon\PayV2\Model\AsyncManagement\RefundFactory $refundFactory,
+        \Amazon\PayV2\Logger\AsyncIpnLogger $ipnLogger
     ) {
         // Bypass Magento's CsrfValidator (which rejects POST) and use Amazon SNS Message Validator instead
         $context->getRequest()->setMethod('PUT');
         parent::__construct($context);
 
-        $this->exceptionLogger = $exceptionLogger ?: ObjectManager::getInstance()->get(ExceptionLogger::class);
-        $this->ipnLogger = $ipnLogger;
+        $this->amazonConfig = $amazonConfig;
         $this->chargeFactory = $chargeFactory;
+        $this->refundFactory = $refundFactory;
+        $this->ipnLogger = $ipnLogger;
     }
 
     public function execute()
     {
+        if (!$this->amazonConfig->isEnabled()) {
+            return;
+        }
+
         try {
-            //*
-            // Log server IPN requests for localdev testing (e.g. with Postman)
-            $this->ipnLogger->info(print_r($this->getRequest()->getHeaders()->toArray(), 1));
-            $this->ipnLogger->info($this->getRequest()->getContent());
-            //*/
+            if ($this->amazonConfig->isLoggingEnabled()) {
+                $this->ipnLogger->info(print_r($this->getRequest()->getHeaders()->toArray(), 1));
+                $this->ipnLogger->info($this->getRequest()->getContent());
+            }
 
             // Amazon SNS Message Validator
             $snsMessage = Message::fromRawPostData();
-            $validator = new MessageValidator();
+            $validator  = new MessageValidator();
 
             // Message Validator checks SigningCertURL, SignatureVersion, and Signature
             if ($validator->isValid($snsMessage)) {
@@ -77,15 +99,16 @@ class Ipn extends \Magento\Framework\App\Action\Action
                             $this->chargeFactory->create()->processStateChange($message['ObjectId']);
                             break;
                         case 'REFUND':
-                            // @todo verify refund
+                            $this->refundFactory->create()->processRefund($message['ObjectId']);
                             break;
                     }
                 }
+            } else {
+                $this->ipnLogger->warning('Invalid SNS Message');
             }
 
         } catch (\Exception $e) {
-            $this->exceptionLogger->logException($e);
-            $this->ipnLogger->debug(($e->getMessage()));
+            $this->ipnLogger->error($e);
             throw $e;
         }
     }

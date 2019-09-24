@@ -24,6 +24,11 @@ class AsyncUpdater
     private $chargeFactory;
 
     /**
+     * @var AsyncManagement\RefundFactory
+     */
+    private $refundFactory;
+
+    /**
      * @var \Amazon\PayV2\Api\Data\AsyncInterfaceFactory
      */
     private $asyncFactory;
@@ -34,26 +39,28 @@ class AsyncUpdater
     private $adminNotifier;
 
     /**
+     * @var \Amazon\PayV2\Logger\AsyncIpnLogger
+     */
+    private $asyncLogger;
+
+    /**
      * @var \Psr\Log\LoggerInterface
      */
     private $logger;
 
-    /**
-     * AsyncUpdater constructor.
-     * @param AsyncManagement\ChargeFactory $chargeFactory
-     * @param \Amazon\PayV2\Api\Data\AsyncInterfaceFactory $asyncFactory
-     * @param \Magento\Framework\Notification\NotifierInterface $adminNotifier
-     * @param \Psr\Log\LoggerInterface $logger
-     */
     public function __construct(
         \Amazon\PayV2\Model\AsyncManagement\ChargeFactory $chargeFactory,
+        \Amazon\PayV2\Model\AsyncManagement\RefundFactory $refundFactory,
         \Amazon\PayV2\Api\Data\AsyncInterfaceFactory $asyncFactory,
         \Magento\Framework\Notification\NotifierInterface $adminNotifier,
+        \Amazon\PayV2\Logger\AsyncIpnLogger $asyncLogger,
         \Psr\Log\LoggerInterface $logger
     ) {
         $this->chargeFactory = $chargeFactory;
+        $this->refundFactory = $refundFactory;
         $this->asyncFactory = $asyncFactory;
         $this->adminNotifier = $adminNotifier;
+        $this->asyncLogger = $asyncLogger;
         $this->logger = $logger;
     }
 
@@ -72,7 +79,7 @@ class AsyncUpdater
                     $this->completePending($async);
                     break;
                 case AsyncManagement::ACTION_REFUND:
-                    // @todo verify refund
+                    $this->refundFactory->create()->processRefund($async->getPendingId());
                     $this->completePending($async);
                     break;
             }
@@ -80,6 +87,7 @@ class AsyncUpdater
             $async->getResource()->commit();
         } catch (\Exception $e) {
             $this->logger->error($e);
+            $this->asyncLogger->error($e);
             $async->getResource()->rollBack();
         }
     }
