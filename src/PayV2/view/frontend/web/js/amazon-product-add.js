@@ -35,7 +35,7 @@ define([
             _this = this;
             // Hide for Edge, since click event does not trigger
             if (/Edge\/\d./i.test(navigator.userAgent)) {
-                $(parentSelector).hide();
+                $(this.options.parentSelector).hide();
             }
             this.setupTriggers();
         },
