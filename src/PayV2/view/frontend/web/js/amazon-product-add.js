@@ -51,7 +51,7 @@ define([
                 //only trigger the amazon button click if the user has chosen to add to cart via this method
                 if (addedViaAmazon) {
                     addedViaAmazon = false;
-                    $(parentSelector + ' .amazon-checkout-button').trigger('click');
+                    $(this.options.parentSelector + ' .amazon-checkout-button').trigger('click');
                 }
             }, this);
 
